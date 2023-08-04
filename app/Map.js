@@ -1,20 +1,41 @@
-// import { MapContainer, TileLayer, useMap } from "react-leaflet";
+
+import React from "react";
+import { StyleSheet, View, SafeAreaView } from "react-native";
+import { LeafletView } from "react-native-leaflet";
+
+
+const DEFAULT_COORDINATE = {
+  lat: 37.78825,
+  lng: -122.4324,
+};
+
 
 const MapDisplay = () => {
   return (
-    // <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
-    //   <TileLayer
-    //     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    //     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    //   />
-    //   <Marker position={[51.505, -0.09]}>
-    //     <Popup>
-    //       A pretty CSS3 popup. <br /> Easily customizable.
-    //     </Popup>
-    //   </Marker>
-    // </MapContainer>
-    <View>hello</View>
+    <View>
+      <SafeAreaView style={styles.root}>
+        <LeafletView
+          mapMarkers={[
+            {
+              position: DEFAULT_COORDINATE,
+              icon: "📍",
+              size: [32, 32],
+            },
+          ]}
+          mapCenterPosition={DEFAULT_COORDINATE}
+        />
+      </SafeAreaView>
+    </View>
   );
 };
 
 export default MapDisplay;
+
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

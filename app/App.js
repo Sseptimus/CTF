@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, View} from 'react-native';
-// import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { Button, StyleSheet, Text, View, SafeAreaView } from "react-native";
 import {MapDisplay} from "./Map.js";
+import { LeafletView } from "react-native-leaflet";
 
 
 
@@ -25,7 +25,7 @@ const MainDisplay = props => {
 }
 
 export default function App() {
-  let display = "home"
+  const [display, setDisplay] = useState("home");
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -34,13 +34,13 @@ export default function App() {
         <Button
           title="map"
           onPress={() => {
-            display = "map";
+            setDisplay("map");
           }}
         />
         <Button
           title="home"
           onPress={() => {
-            display = "home";
+            setDisplay("home");
           }}
         />
       </View>
@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
     height: "100%",
+    width: "100%",
     
   }
 });
