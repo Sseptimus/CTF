@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, View } from 'react-native';
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import {MapDisplay} from "./app/Map.js";
+import { Button, StyleSheet, Text, View} from 'react-native';
+// import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import {MapDisplay} from "./Map.js";
 
 
 
@@ -17,7 +17,7 @@ const MainDisplay = props => {
       break;
   }
   return (
-    <View>
+    <View style={styles.main}>
       <Text>Open up App.js to start working on your app!</Text>
       {display}
     </View>
@@ -28,13 +28,21 @@ export default function App() {
   let display = "home"
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" />
-      <MainDisplay  />
-      <View id='footer'>
-        <Button title="map" onPress={() => {display="map"}} />
-        <Button title="home" onPress={() => {display="home"}} />
-
+      <MainDisplay />
+      <View style={styles.footer}>
+        <Button
+          title="map"
+          onPress={() => {
+            display = "map";
+          }}
+        />
+        <Button
+          title="home"
+          onPress={() => {
+            display = "home";
+          }}
+        />
       </View>
     </View>
   );
@@ -42,16 +50,33 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    display: "flex",
+    justifyContent: "flex-end",
+    backgroundColor: "#fff",
+    // alignItems: "center",
+    // justifyContent: "center",
+    height: "100%",
+  },
+  footer: {
+    display: "flex",
+    position: "relative",
+    // height: 100,
+    borderTopColor: "#000",
+    borderTopWidth: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    bottom: 0,
+    padding: 20,
+    gap: 20,
+    width: "100%",
   },
-  footer: {
-    flex: 1,
-    backgroundColor: "#caa",
-    alignItems: "center",
+  main: {
+    display: "flex",
+    alignContent: "center",
     justifyContent: "center",
+    height: "100%",
     
-  },
+  }
 });
