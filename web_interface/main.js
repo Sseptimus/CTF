@@ -4,6 +4,7 @@ var video_on = false;
 var video = document.querySelector("video");
 
 
+
 onload = function () {
     map = L.map("map").setView([51.505, -0.09], 13);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
