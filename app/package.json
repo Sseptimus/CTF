@@ -1,5 +1,5 @@
 {
-  "name": "ctf",
+  "name": "app",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -11,7 +11,9 @@
   "dependencies": {
     "expo": "~49.0.5",
     "expo-status-bar": "~1.6.0",
-    "react": "18.2.0",
+    "leaflet": "^1.9.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-native": "0.72.3"
   },
   "devDependencies": {
