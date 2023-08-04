@@ -52,9 +52,32 @@
     <button onclick="map.setView(coord);">
         center
     </button>
+    <button id="toggle_video_off" onclick="
+        video_on = false;
+        document.getElementById('toggle_video_off').enabled = true;
+        document.getElementById('toggle_video_on').enabled = false;
+        document.getElementById('video').style.display = 'none';
+        stopWebCam();
+    
+    "
+    enabled="false"
+    >video off</button>
+    <button id="toggle_video_on" onclick="
+        video_on = true;
+        document.getElementById('toggle_video_off').enabled = true;
+        document.getElementById('toggle_video_on').enabled = false;
+        document.getElementById('video').style.display = 'block';
+        startWebCam();
+    
+    ">
+        video on
+    </button>
      <div id="map", class="map"></div>
-    <div class="footer">
+     
+    <div class="photo">
+        <video id="video", class="video">
 
+        </video>
     </div>
 
 

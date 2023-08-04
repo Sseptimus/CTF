@@ -1,5 +1,9 @@
 var map;
 var coord;
+var video_on = false;
+var video = document.querySelector("video");
+
+
 onload = function () {
     map = L.map("map").setView([51.505, -0.09], 13);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -22,6 +26,7 @@ map.on("click", onMapClick);
       console.log(coord);
       
     }, 1000);
+    video = document.querySelector("video");
 
 };
 var uLat = 0;
@@ -71,4 +76,45 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
+}
+
+var constraints = { audio: false, video: true };
+
+function successCallback(stream) {
+  video.srcObject = stream;
+  video.play();
+  var url = window.URL.createObjectURL(stream);
+  cameraStream = stream;
+}
+
+function errorCallback(error) {
+  console.log("navigator.getUserMedia error: ", error);
+}
+
+function startWebCam() {
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then(successCallback)
+    .catch(errorCallback);
+}
+
+function get_url() {
+  var container = document.getElementById("url_container");
+  var canvas = document.createElement("canvas");
+  canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth;
+  var ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  console.log(canvas.toDataURL());
+  container.textContent = canvas.toDataURL();
+}
+
+function stopWebCam() {
+  if (video) {
+    const mediaStream = video.srcObject;
+    const tracks = mediaStream.getTracks();
+    tracks.forEach((track) => track.stop());
+  }
+
+  stream = null;
 }

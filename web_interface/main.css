@@ -7,6 +7,11 @@ body {
     overflow: hidden;
 }
 
+video {
+    border: 1px solid black;
+}
+
+
 .lock {
     height: 100%;
     width: 100%;
