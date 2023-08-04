@@ -40,3 +40,26 @@ button {
     left: 0;
     top: 0;
 }
+
+#challengeCard{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.878);
+    z-index: 1;
+    display: none;
+    left: 0;
+    top: 0;
+    color: #f1f1f1;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap:5em;
+}
+.card{
+    display: block;
+  max-width:920px;
+  max-height:380px;
+  width: auto;
+  height: auto;
+}

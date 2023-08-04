@@ -2,7 +2,8 @@ var map;
 var coord;
 var video_on = false;
 var video = document.querySelector("video");
-
+var vetoed = false;
+var currentChallenge = 0
 
 onload = function () {
     map = L.map("map").setView([51.505, -0.09], 13);
