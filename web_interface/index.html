@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Example</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+ crossorigin=""></script>
+ <script src='main.js'></script>
+</head>
+<body>
+    <div id="lock" class="lock" onmousedown="
+        document.getElementById('lock1').disabled  = false;
+        document.getElementById('lock2').disabled  = true;
+        ">
+        lock
+        <button id="lock1" disabled="false" onclick="
+        document.getElementById('lock1').disabled  = true;
+        document.getElementById('lock2').disabled  = false;
+        ">
+            click to unlock
+        </button>
+        <button disabled="true" id="lock2" onmousedown="
+        document.getElementById('lock1').disabled  = false;
+        document.getElementById('lock2').disabled  = true;
+        document.getElementById('lock').style.display = 'none';
+        ">
+            click to unlock
+        </button>
+
+    </div>
+    <button onclick="toggleFullScreen()">
+        fullscreen
+    </button>
+    <button onclick="
+        lock = document.getElementById('lock');
+        if (lock.style.display == 'none') {
+            lock.style.display = 'flex';
+        } else {
+            lock.style.display = 'none';
+        }
+    ">
+        lock screen
+    </button>
+    <button onclick="map.setView(get_coord());">
+        center
+    </button>
+     <div id="map", class="map"></div>
+    <div class="footer">
+
+    </div>
+
+
+
+
+
+
+    <script>
+/* Get the documentElement (<html>) to display the page in fullscreen */
+var elem = document.documentElement;
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+    if (document.exitFullscreen) {
+        document.exitFullscreen(); 
+    }
+    }
+}
+
+/* View in fullscreen */
+function openFullscreen() {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+
+/* Close fullscreen */
+function closeFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) { /* Safari */
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) { /* IE11 */
+    document.msExitFullscreen();
+  }
+}
+</script>
+</body>
+</html>
