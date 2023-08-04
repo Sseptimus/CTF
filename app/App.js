@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, StyleSheet, Text, View, SafeAreaView } from "react-native";
-import {MapDisplay} from "./Map.js";
-import { LeafletView } from "react-native-leaflet";
+// import {MapDisplay} from "./Map.js";
+// import { LeafletView } from "react-native-leaflet";
 
 
 
@@ -10,7 +10,7 @@ const MainDisplay = props => {
   var display = <Text>no display {props.display}</Text>
   switch (props.display) {
     case "map":
-      display = <MapDisplay />
+      // display = <MapDisplay />
       break;
     case "home":
       display = <Text>home</Text>
