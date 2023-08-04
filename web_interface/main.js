@@ -16,12 +16,12 @@ map.on("click", onMapClick);
     var intervalId = window.setInterval(function () {
         old_coord = coord;
         coord = get_coord();
-        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1]) / 5)/60;
+        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1]))/60;
       marker.setLatLng(coord);
       marker.bindTooltip("You \n("+String(speed)+"km/h)").openTooltip();
       console.log(coord);
       
-    }, 5000);
+    }, 1000);
 
 };
 var uLat = 0;
