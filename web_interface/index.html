@@ -36,6 +36,23 @@
         </button>
 
     </div>
+    <div id = "challengeCard">
+      <img class = "card" src = "Moneky.jpeg">
+      <button>
+        Complete
+      </button>
+      <button onclick="
+      vetoed = true;
+      document.getElementById('openChallengeCard').style.color =  '#ffffff';
+      document.getElementById('challengeCard').style.display = 'none';
+      setTimeout(veto,3000);
+      ">
+        Veto
+      </button>
+      <button onclick="closeChallenge()">
+        Close
+      </button>
+    </div>
     <button onclick="toggleFullScreen()">
         fullscreen
     </button>
@@ -71,6 +88,8 @@
     
     ">
         video on
+    <button id = "openChallengeCard" onclick = "openChallenge()">
+      challenge
     </button>
      <div id="map", class="map"></div>
      
@@ -133,6 +152,20 @@ function closeFullscreen() {
   } else if (document.msExitFullscreen) { /* IE11 */
     document.msExitFullscreen();
   }
+}
+/* Open challenge menu */
+function openChallenge(){
+if(!vetoed){
+document.getElementById("challengeCard").style.display = 'flex';
+}
+}
+function closeChallenge(){
+document.getElementById("challengeCard").style.display = 'none';
+}
+function veto(){
+  vetoed = false;
+  document.getElementById('openChallengeCard').style.color =  '#000000';
+
 }
 </script>
 </body>
