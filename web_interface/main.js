@@ -13,7 +13,7 @@ onload = function () {
     var marker = L.marker([51.5, -0.09]).addTo(map);
     marker.riseOnHover = true;
     function onMapClick(e) {
-    alert("You clicked the map at " + e.latlng);
+    // alert("You clicked the map at " + e.latlng);
 }
 map.on("click", onMapClick);
 
@@ -23,7 +23,6 @@ map.on("click", onMapClick);
         speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1]))/60;
       marker.setLatLng(coord);
       marker.bindTooltip("You \n("+String(speed)+"km/h)").openTooltip();
-      console.log(coord);
       
     }, 1000);
     video = document.querySelector("video");
@@ -37,7 +36,7 @@ function get_coord() {
         // get users lat/long
         
         var getPosition = {
-          enableHighAccuracy: false,
+          enableHighAccuracy: true,
           timeout: 9000,
           maximumAge: 0
         };
