@@ -1,6 +1,12 @@
-import { StatusBar } from 'expo-status-bar';
+// import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, View, Button, TextInput } from "react-native";
+import { registerRootComponent } from "expo";
 import VIForegroundService from "@voximplant/react-native-foreground-service";
+import React, { useState, useEffect, Component } from "react";
+
+
+
+
 
 class App extends Component {
   foregroundService = VIForegroundService.getInstance();
@@ -63,7 +69,6 @@ class App extends Component {
           title="Start foreground service"
           onPress={() => this.startService()}
         />
-        <TextInput></TextInput>
         <View style={styles.space} />
         <Button
           title="Stop foreground service"
@@ -74,7 +79,7 @@ class App extends Component {
   }
 }
 
-export default App;
+registerRootComponent(App);
 
 const styles = StyleSheet.create({
   container: {
