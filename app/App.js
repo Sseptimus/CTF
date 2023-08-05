@@ -1,82 +1,46 @@
 // import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, View, Button, TextInput } from "react-native";
+import { Platform, StyleSheet, View, Button, TextInput, Text } from "react-native";
 import { registerRootComponent } from "expo";
-import VIForegroundService from "@voximplant/react-native-foreground-service";
 import React, { useState, useEffect, Component } from "react";
+import ReactNativeForegroundService from "@supersami/rn-foreground-service";
+ReactNativeForegroundService.register();
 
+function update() {
+  console.log("Updating notification");
+}
 
+function App() {
+  
+  ReactNativeForegroundService.add_task(() => update(), {
+    delay: 1000,
+    onLoop: true,
+    taskId: "taskid",
+    onError: (e) => console.log(`Error logging:`, e),
+  });
 
+  ReactNativeForegroundService.start({
+    id: 1244,
+    title: "Foreground Service",
+    message: "We are live World",
+    icon: "ic_launcher",
+    button: true,
+    button2: true,
+    buttonText: "Button",
+    button2Text: "Anther Button",
+    buttonOnPress: "cray",
+    setOnlyAlertOnce: true,
+    color: "#000000",
+    progress: {
+      max: 100,
+      curr: 50,
+    },
+  }).catch((err) => console.log('error in init',err));
 
-
-class App extends Component {
-  foregroundService = VIForegroundService.getInstance();
-
-  state = {
-    isRunningService: false,
-  };
-
-  async startService() {
-    if (Platform.OS !== "android") {
-      console.log("Only Android platform is supported");
-      return;
-    }
-    if (this.state.isRunningService) return;
-    if (Platform.Version >= 26) {
-      const channelConfig = {
-        id: "ForegroundServiceChannel",
-        name: "Notification Channel",
-        description: "Notification Channel for Foreground Service",
-        enableVibration: false,
-        importance: 2,
-      };
-      await this.foregroundService.createNotificationChannel(channelConfig);
-    }
-    const notificationConfig = {
-      channelId: "ForegroundServiceChannel",
-      id: 3456,
-      title: "Foreground Service",
-      text: "Foreground service is running",
-      icon: "ic_notification",
-      priority: 0,
-      button: "Stop service",
-    };
-    try {
-      this.subscribeForegroundButtonPressedEvent();
-      await this.foregroundService.startService(notificationConfig);
-      this.setState({ isRunningService: true });
-    } catch (_) {
-      this.foregroundService.off();
-    }
-  }
-
-  async stopService() {
-    if (!this.state.isRunningService) return;
-    this.setState({ isRunningService: false });
-    await this.foregroundService.stopService();
-    this.foregroundService.off();
-  }
-
-  subscribeForegroundButtonPressedEvent() {
-    this.foregroundService.on("VIForegroundServiceButtonPressed", async () => {
-      await this.stopService();
-    });
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Button
-          title="Start foreground service"
-          onPress={() => this.startService()}
-        />
-        <View style={styles.space} />
-        <Button
-          title="Stop foreground service"
-          onPress={() => this.stopService()}
-        />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <Text>Open up App.js to start working on your app!</Text>
+    </View>
+  )
 }
 
 registerRootComponent(App);

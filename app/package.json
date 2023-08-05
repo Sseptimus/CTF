@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@voximplant/react-native-foreground-service": "^3.0.2",
+    "@supersami/rn-foreground-service": "^2.1.0",
     "expo": "~49.0.5",
     "expo-splash-screen": "~0.20.4",
     "expo-status-bar": "~1.6.0",

@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "ctt_tracker",
+
     "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
