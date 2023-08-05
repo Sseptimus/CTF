@@ -1,7 +1,6 @@
 {
   "expo": {
     "name": "ctt_tracker",
-
     "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,12 +18,15 @@
       "supportsTablet": true
     },
     "android": {
-      "permissions":["android.permission.FOREGROUND_SERVICE"],
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
+        "package": "com.syzygy.ctt_tracker",
         "backgroundColor": "#ffffff"
-      }
-
+      },
+      "package": "com.syzygy.ctt_tracker"
     },
     "web": {
       "favicon": "./assets/favicon.png"
