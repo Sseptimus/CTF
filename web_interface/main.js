@@ -5,37 +5,64 @@ var video = document.querySelector("video");
 var vetoed = false;
 var currentChallenge = 0
 
+var marker = undefined;
 
 onload = function () {
-    map = L.map("map").setView([51.505, -0.09], 13);
+    map = L.map("map").setView([51.505, -0.09], 1);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "© OpenStreetMap",
     }).addTo(map);
-    var marker = L.marker([51.5, -0.09]).addTo(map);
+    if (marker == undefined) {
+      marker = L.marker(get_coord()).addTo(map);
+      map.setView(get_coord(), 1.8);
+      marker.opacity = 0.0;
+    }
     marker.riseOnHover = true;
     function onMapClick(e) {
     // alert("You clicked the map at " + e.latlng);
 }
 map.on("click", onMapClick);
+var intervalId = window.setInterval(function () {
 
-    var intervalId = window.setInterval(function () {
+
+        if (document.getElementById("lock").style.display != "none") {
+            return;
+        }
+
+        if (marker == undefined) {
+            marker = L.marker([51.5, -0.09]).addTo(map)
+            // map.setView(get_coord(), 13);
+            
+        }
         
         old_coord = coord;
         coord = get_coord();
-        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1])/5)*60*60;
+        if ((old_coord == undefined) && coord!=old_coord) {
+            map.setView(coord, 13);
+            marker.setLatLng(coord);
+            marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
+            marker.opacity = 1.0;
+        }
+        
+        speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/5)*3.6;
         if (speed > 300) {
             speed = 0;
+            if (coord != [51.505, -0.09]) {
+              map.setView(coord, 13);
+            }
         }
-      marker.setLatLng(coord);
-      marker.bindTooltip("You \n("+String(speed)+"km/h)").openTooltip();
-      
+        speed=speed.toPrecision(3)
+        marker.setLatLng(coord);
+        marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
+    
+    
     }, 5000);
     video = document.querySelector("video");
-
+    
 };
-var uLat = 0;
-var uLon = 0;
+var uLat = 51.505;
+var uLon = -0.09;
 
 function get_coord() {
      
@@ -64,20 +91,7 @@ function get_coord() {
     }
 
 
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2 - lat1); // deg2rad below
-  var dLon = deg2rad(lon2 - lon1);
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c; // Distance in km
-  return d;
-}
+
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
