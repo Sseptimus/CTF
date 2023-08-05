@@ -1,7 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import VIForegroundService from "@voximplant/react-native-foreground-service";
 
-export default function App() {
+
+export default async function App() {
+
+  const channelConfig = {
+    id: 'channelId',
+    name: 'Channel name',
+    description: 'Channel description',
+    enableVibration: false
+  };
+  await VIForegroundService.getInstance().createNotificationChannel(channelConfig);
+
   return (
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app!</Text>

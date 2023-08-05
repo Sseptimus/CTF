@@ -7,6 +7,8 @@ var currentChallenge = 0
 
 var marker = undefined;
 
+var now = Date.now();
+
 onload = function () {
     map = L.map("map").setView([51.505, -0.09], 1);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -44,8 +46,11 @@ var intervalId = window.setInterval(function () {
             marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
             marker.opacity = 1.0;
         }
-        
-        speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/5)*3.6;
+
+        speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
+        now = Date.now();
+
+
         if (speed > 300) {
             speed = 0;
             if (coord != [51.505, -0.09]) {

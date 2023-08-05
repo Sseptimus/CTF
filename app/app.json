@@ -22,8 +22,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
-      
+      },
+      "package":"com.syzygy.ctt_tracker"
+
     },
     "web": {
       "favicon": "./assets/favicon.png"
