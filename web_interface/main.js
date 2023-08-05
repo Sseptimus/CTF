@@ -4,12 +4,45 @@ var video_on = false;
 var video = document.querySelector("video");
 var vetoed = false;
 var currentChallenge = 0
-
 var marker = undefined;
+var screenLock = null;
+
+async function getScreenLock() {
+  if (isScreenLockSupported()) {
+    try {
+      screenLock = await navigator.wakeLock.request("screen");
+    } catch (err) {
+      console.log(err.name, err.message);
+    }
+  }
+}
+
+function isScreenLockSupported() {
+  return (`wakeLock` in navigator);
+}
+
+function release() { 
+  if(typeof screenLock !== "undefined" && screenLock != null) {
+    screenLock.release()
+    .then(() => {
+      console.log("Lock released 🎈");
+      screenLock = null;
+    });
+  }
+}
+
+document.addEventListener("visibilitychange", async () => {
+  if (screenLock !== null && document.visibilityState === "visible") {
+    screenLock = await navigator.wakeLock.request("screen");
+  }
+});
 
 var now = Date.now();
 
 onload = function () {
+    lock = document.getElementById("lock");
+    lock.style.display = "none";
+
     map = L.map("map").setView([51.505, -0.09], 1);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -21,6 +54,7 @@ onload = function () {
       marker.opacity = 0.0;
     }
     marker.riseOnHover = true;
+    coord = get_coord();
     function onMapClick(e) {
     // alert("You clicked the map at " + e.latlng);
 }
@@ -28,16 +62,14 @@ map.on("click", onMapClick);
 var intervalId = window.setInterval(function () {
 
 
-        if (document.getElementById("lock").style.display != "none") {
+        if (document.getElementById("lock").style.display != 'none') {
             return;
         }
 
         if (marker == undefined) {
             marker = L.marker([51.5, -0.09]).addTo(map)
-            // map.setView(get_coord(), 13);
-            
         }
-        
+
         old_coord = coord;
         coord = get_coord();
         if ((old_coord == undefined) && coord!=old_coord) {
@@ -57,7 +89,7 @@ var intervalId = window.setInterval(function () {
               map.setView(coord, 13);
             }
         }
-        speed=speed.toPrecision(3)
+        speed = Math.round(speed * 10) / 10;
         marker.setLatLng(coord);
         marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
     
