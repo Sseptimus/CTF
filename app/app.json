@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "app",
+    "name": "ctt_tracker",
     "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,8 +22,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package":"com.syzygy.ctt_tracker"
+      }
 
     },
     "web": {
