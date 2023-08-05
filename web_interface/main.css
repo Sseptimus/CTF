@@ -16,7 +16,7 @@ body {
     flex-direction: column;
     gap: 1em;
     position: absolute;
-
+    pointer-events: none;
 }
 
 .lock_button {
@@ -72,6 +72,25 @@ svg {
     border-radius: 0.5em;
 }
 
+.info_text {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    padding-top: 0;
+    top: 0.5em;
+    transform: translate(-50%, -0%);
+    background-color: #ffffffa6;
+    border-radius: 0.5em;
+    padding: 0.1em;
+    font-size: 1.5em;
+    color: #000000;
+    /* display: none; */
+}
+
+.info_text p {
+    margin: 0;
+    padding: 0;
+}
 
 .lock {
     height: 100%;
@@ -97,6 +116,7 @@ button {
     border: none;
     border-radius: .5em;
     padding: 0.5em;
+    pointer-events: fill;
 }
 
 button:active {
@@ -110,6 +130,7 @@ button:active {
     font-size: 2em;
     padding: 0.5em;
     border-radius: 0.5em;
+    pointer-events: fill;
 }
 
 .lock button:disabled {
