@@ -5,11 +5,67 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    
+}
+
+.buttons {
+    bottom:2em;
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 1em;
+    position: absolute;
+
+}
+
+.lock_button {
+    position: absolute;
+    z-index: 4;
+    right: 1em;
+    top: 1em;
+}
+
+.lock::after:disabled {
+    content: "Locked";
+}
+
+.photo {
+    position: absolute;
+    z-index: 1;
+    display: none;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #646f5bbc;
 }
 
 video {
+    object-fit: cover;
     border: 1px solid black;
-    display: none;
+    max-width: 95%;
+    max-height: 95%;
+}
+
+.take-photo {
+    position: absolute;
+    z-index: 2;
+    bottom: 10%;  
+    left: 50%; 
+    transform: translate(-50%, -0%);
+}
+
+#toggle_video_off {
+    position: absolute;
+    z-index: 2;
+    left: 10%;
+    bottom: 3em;
+
+    border-radius: 0.5em;
 }
 
 
@@ -18,7 +74,7 @@ video {
     width: 100%;
     position: absolute;
     background-color: rgba(0, 0, 0, 0.878);
-    z-index: 1;
+    z-index: 5;
     display: none;
     left: 0;
     top: 0;
@@ -29,8 +85,36 @@ video {
     flex-direction: column;
     gap:5em;
 }
+
+
 button {
     font-size: x-large;
+    background-color: #ffffffd4;
+    border: none;
+    border-radius: .5em;
+    padding: 0.5em;
+}
+
+button:active {
+    background-color: #ffffffa6;
+}
+
+.lock button {
+    background-color: #ffffff00;
+    border: none;
+    color: #f1f1f1;
+    font-size: 2em;
+    padding: 0.5em;
+    border-radius: 0.5em;
+}
+
+.lock button:disabled {
+    background-color: #ffffff00;
+    border: none;
+    color: #be7b7b62;
+    font-size: 1.8em;
+    padding: 0.5em;
+    border-radius: 0.5em;
 }
 
 #map {

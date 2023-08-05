@@ -53,10 +53,7 @@
         Close
       </button>
     </div>
-    <button onclick="toggleFullScreen()">
-        fullscreen
-    </button>
-    <button onclick="
+    <button class="lock_button" onclick="
         lock = document.getElementById('lock');
         if (lock.style.display == 'none') {
             lock.style.display = 'flex';
@@ -64,43 +61,44 @@
             lock.style.display = 'none';
         }
     ">
-        lock screen
+        <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="#4b4b4b" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"></path></svg>
     </button>
+    <div class="buttons">
+    <button onclick="toggleFullScreen()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"></path></svg></button>
     <button onclick="map.setView(coord);">
-        center
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"></path></svg>
     </button>
-    <button id="toggle_video_off" onclick="
-        video_on = false;
-        document.getElementById('toggle_video_off').enabled = true;
-        document.getElementById('toggle_video_on').enabled = false;
-        document.getElementById('video').style.display = 'none';
-        stopWebCam();
-    
-    "
-    enabled="false"
-    >video off</button>
     <button id="toggle_video_on" onclick="
         video_on = true;
-        document.getElementById('toggle_video_off').enabled = true;
-        document.getElementById('toggle_video_on').enabled = false;
-        document.getElementById('video').style.display = 'block';
+        document.getElementById('photo').style.display = 'flex';
         startWebCam();
-    
     ">
-        video on
+        <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="#f83636" viewBox="0 0 256 256"><path d="M251.77,73a8,8,0,0,0-8.21.39L208,97.05V72a16,16,0,0,0-16-16H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V159l35.56,23.71A8,8,0,0,0,248,184a8,8,0,0,0,8-8V80A8,8,0,0,0,251.77,73ZM192,184H32V72H192V184Zm48-22.95-32-21.33V116.28L240,95Z"></path></svg>
     <button id = "openChallengeCard" onclick = "openChallenge()">
       challenge
     </button>
-     <div id="map", class="map"></div>
-     
-    <div class="photo">
-        <video id="video", class="video">
-
-        </video>
+    <input type="text" value="password" title="game password">
+    </div>
+    <div id="map", class="map"></div>
+    
+    <div class="photo"  id="photo">
+        <button id="toggle_video_off" onclick="
+            video_on = false;
+            document.getElementById('photo').style.display = 'none';
+            stopWebCam();
+        
+        "
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M232,144a64.07,64.07,0,0,1-64,64H80a8,8,0,0,1,0-16h88a48,48,0,0,0,0-96H51.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,85.66,45.66L51.31,80H168A64.07,64.07,0,0,1,232,144Z"></path></svg>
+    </button>
+    <button class="take-photo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="#e90903" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Z"></path><circle cx="128" cy="128" r="72"></circle></svg>
+    </button>
+        <video id="video", class="video"></video>
     </div>
 
 
-
+<!-- 
 <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -115,7 +113,7 @@
         selectElement.dispatchEvent(new Event('change'));
       }, 1000);
     }
-  </script>
+  </script> -->
 
 
     <script>

@@ -20,13 +20,14 @@ onload = function () {
 map.on("click", onMapClick);
 
     var intervalId = window.setInterval(function () {
+        
         old_coord = coord;
         coord = get_coord();
-        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1]))/60;
+        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1])/5)/60;
       marker.setLatLng(coord);
       marker.bindTooltip("You \n("+String(speed)+"km/h)").openTooltip();
       
-    }, 1000);
+    }, 5000);
     video = document.querySelector("video");
 
 };
