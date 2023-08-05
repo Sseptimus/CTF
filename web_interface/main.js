@@ -23,7 +23,10 @@ map.on("click", onMapClick);
         
         old_coord = coord;
         coord = get_coord();
-        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1])/5)/60;
+        speed = (getDistanceFromLatLonInKm(old_coord[0], old_coord[1], coord[0], coord[1])/5)*60*60;
+        if (speed > 300) {
+            speed = 0;
+        }
       marker.setLatLng(coord);
       marker.bindTooltip("You \n("+String(speed)+"km/h)").openTooltip();
       

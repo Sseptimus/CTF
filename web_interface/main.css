@@ -51,6 +51,10 @@ video {
     max-height: 95%;
 }
 
+svg {
+    scale: calc(32px*2em/32px);
+}
+
 .take-photo {
     position: absolute;
     z-index: 2;
