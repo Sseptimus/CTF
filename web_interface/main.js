@@ -10,22 +10,64 @@ var screenLock = null;
 
 var myIcon = L.divIcon({ className: "my-div-icon"});
 
-var name = "ollie";
+var player_name = "ollie";
 var team = 1;
-var password = "password";
+// random number
+var id = Math.floor(Math.random() * 1000000000);
+if (getCookie("id") != null) {
+  id = getCookie("id");
+}
+
+setCookie("id", id, 365);
+
+if (getCookie("name") != null) {
+  player_name = getCookie("name");
+}
+
+setCookie("name", player_name, 365);
+
+
+var password = "";
+
+if (getCookie("password") != null) {
+  password = getCookie("password");
+  
+}
+
 var url = "http://127.0.0.1:8000/";
 
 var people = {}
 
 function send_server_data() {
-  
+  // send data to server
+  var data = {team: team, coord: coord};
+  xhr = new XMLHttpRequest();
+  xhr.open("POST", url + "set_data?player_id=" + id, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      // Print received data from server
+      console.log(this.responseText);
+    }
+  };
+
+  // Converting JSON data to string
+  var data = JSON.stringify({ player_name: { coord: coord, team: team } });
+  data = data.replace("name", player_name);
+  console.log(data);
+
+  // Sending data with the request
+  xhr.send(data);
+
 }
 
+
 function get_server_data(json) {
+
   
-  json = JSON.parse(
-    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
-  );
+  
+
   console.log(json);
   // add json to people 
   for (i in json) {
@@ -103,6 +145,11 @@ onload = function () {
     lock = document.getElementById("lock");
     lock.style.display = "none";
 
+
+    document.getElementById("name").value = player_name;
+    document.getElementById("team").value = team;
+    document.getElementById("password").value = password;
+
     map = L.map("map").setView([51.505, -0.09], 1);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -121,15 +168,16 @@ map.on("click", onMapClick);
 var intervalId = window.setInterval(function () {
 
 
+        send_server_data();
+
         if (document.getElementById("lock").style.display != 'none') {
             return;
         }
 
-        get_server_data();
+        // get_server_data();
 
 
         for (i in people) {
-          console.log(people[i])
           // if (typeof people[i].marker == "undefined") {
           //   console.log("marker undefined", people[i]['coord']);
           //   people[i]['marker'] = L.marker(people[i]['coord']).addTo(map);
@@ -184,7 +232,6 @@ function get_coord() {
         function success(gotPosition) {
             uLat = gotPosition.coords.latitude;
             uLon = gotPosition.coords.longitude;
-            console.log(`${uLat}`, `${uLon}`);
         
         };
         
