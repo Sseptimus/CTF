@@ -180,7 +180,7 @@ if __name__ == "__main__":
         KILL = True
         backup()
         
-        print("Stopping server..."")
+        print("Stopping server...")
         
         thread.join()
         
