@@ -34,7 +34,7 @@ if (getCookie("password") != null) {
   
 }
 
-var url = "http://127.0.0.1:8000/";
+var url = "http://localhost:8100/";
 
 var people = {}
 
@@ -53,7 +53,7 @@ function send_server_data() {
   };
 
   // Converting JSON data to string
-  var data = JSON.stringify({ player_name: { coord: coord, team: team } });
+  var data = JSON.stringify({ player_name: { coord: coord, team: team }, password: getPasswordFromCookie() });
   data = data.replace("name", player_name);
   console.log(data);
 
@@ -62,11 +62,20 @@ function send_server_data() {
 
 }
 
+function getPasswordFromCookie() {
+  if (getCookie("password") != null) {
+    password = getCookie("password");
+  }
+  return password;
+}
 
 function get_server_data(json) {  
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
+  
+  const data = JSON.stringify({ password: getPasswordFromCookie() });
+
   xhr.onreadystatechange = function () {
     if (xhr.readyState == 4 && xhr.status == 200) {
       json = JSON.parse(xhr.responseText);
@@ -75,15 +84,11 @@ function get_server_data(json) {
       console.log(xhr);
     }
   };
-  xhr.send();
+  xhr.send(data);
 
   json = JSON.parse(
     '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
   );
-function get_server_data(json) {
-
-  
-  
 
   console.log(json);
   // add json to people 

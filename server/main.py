@@ -44,6 +44,9 @@ def load_backup():
 def merge_json(old, new):
     if type(old) != type(new):
         return new
+    
+    if not isinstance(old, dict):
+        return new
 
     res = old
 
@@ -84,6 +87,7 @@ def handle_json_get(handler):
     else:
         handler.send_response(200)
         handler.send_header("Content-Type", "application/json")
+        handler.send_header("Access-Control-Allow-Origin", "*")
         handler.end_headers()
         handler.wfile.write(json.dumps(data).encode("utf-8"))
 
@@ -91,6 +95,7 @@ def handle_json_get(handler):
 def handle_get_all(handler):
     handler.send_response(200)
     handler.send_header("Content-Type", "application/json")
+    handler.send_header("Access-Control-Allow-Origin", "*")
     handler.end_headers()
     handler.wfile.write(json.dumps(PLAYER_DATA).encode("utf-8"))
 
@@ -131,7 +136,9 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
     @cached_property
     def cookies(self):
-        return SimpleCookie(self.headers.get("Cookie"))
+        cookies = SimpleCookie(self.headers.get("Cookie"))
+        print(cookies)
+        return cookies
 
     def verify_password(self):
         valid = False
@@ -174,20 +181,33 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
     def do_404(self):
         self.send_response(404)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(b"Not found")
 
     def do_Ok(self):
         self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(b"Ok")
+        
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type")
+        self.end_headers()
+        
+    
 
 
 KILL = False
 
 
 def auto_backup():
-    while True:
+    while not KILL:
         time.sleep(20)
         backup()
 
@@ -199,7 +219,7 @@ if __name__ == "__main__":
     thread = threading.Thread(target=auto_backup)
     thread.start()
     
-    server = HTTPServer(("localhost", 8000), WebRequestHandler)
+    server = HTTPServer(("localhost", 8100), WebRequestHandler)
     print(f"{server.server_address[0]}:{server.server_address[1]}")
     print(f"Password: {PASSWORD}")
     try:
