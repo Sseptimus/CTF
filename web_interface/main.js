@@ -1,3 +1,4 @@
+
 var map;
 var coord;
 var video_on = false;
@@ -6,6 +7,62 @@ var vetoed = false;
 var currentChallenge = 0
 var marker = undefined;
 var screenLock = null;
+
+var myIcon = L.divIcon({ className: "my-div-icon"});
+
+var name = "ollie";
+
+var people = {}
+
+function send_server_data() {
+  {}
+}
+
+function get_server_data(json) {
+  
+  json = JSON.parse(
+    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
+  );
+  console.log(json);
+  // add json to people 
+  for (i in json) {
+    if (typeof people[i] == "undefined") {
+      people[i] = {};
+    }
+    people[i]['coord'] = json[i]['coord'];
+    if (typeof people[i]['marker'] == "undefined") {
+      let className = "div-icon";
+      className += " team-"+json[i]['team'];
+      // if (json[i]['connected'] == false) {
+        
+      // }
+      people[i]['marker'] = L.marker(people[i]['coord'], {icon:L.divIcon({ className: className})}).addTo(map);
+      people[i]['marker'].set
+    }
+  }
+
+}
+
+function setCookie(name, value, days) {
+  var expires = "";
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+function getCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(";");
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == " ") c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
 
 async function getScreenLock() {
   if (isScreenLockSupported()) {
@@ -49,9 +106,8 @@ onload = function () {
     attribution: "© OpenStreetMap",
     }).addTo(map);
     if (marker == undefined) {
-      marker = L.marker(get_coord()).addTo(map);
+      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "div-icon"})}).addTo(map);
       map.setView(get_coord(), 1.8);
-      marker.opacity = 0.0;
     }
     marker.riseOnHover = true;
     coord = get_coord();
@@ -66,17 +122,28 @@ var intervalId = window.setInterval(function () {
             return;
         }
 
-        if (marker == undefined) {
-            marker = L.marker([51.5, -0.09]).addTo(map)
+        get_server_data();
+
+
+        for (i in people) {
+          console.log(people[i])
+          // if (typeof people[i].marker == "undefined") {
+          //   console.log("marker undefined", people[i]['coord']);
+          //   people[i]['marker'] = L.marker(people[i]['coord']).addTo(map);
+          // }
+          people[i]['marker'].setLatLng(people[i]['coord']);
+          people[i]['marker'].bindTooltip(i).openTooltip();
         }
+
+
+
 
         old_coord = coord;
         coord = get_coord();
         if ((old_coord == undefined) && coord!=old_coord) {
             map.setView(coord, 13);
             marker.setLatLng(coord);
-            marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
-            marker.opacity = 1.0;
+            marker.bindTooltip("You").openTooltip();
         }
 
         speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
@@ -91,7 +158,7 @@ var intervalId = window.setInterval(function () {
         }
         speed = Math.round(speed * 10) / 10;
         marker.setLatLng(coord);
-        marker.bindTooltip("You \n("+String(speed)+"kmph)").openTooltip();
+        marker.bindTooltip("You").openTooltip();
     
     
     }, 5000);
