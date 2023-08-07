@@ -9,7 +9,7 @@ var marker = undefined;
 var screenLock = null;
 
 var myIcon = L.divIcon({ className: "my-div-icon"});
-
+var url = "http://127.0.0.1:8000/";
 var player_name = "ollie";
 var team = 1;
 // random number
@@ -17,6 +17,12 @@ var id = Math.floor(Math.random() * 1000000000);
 if (getCookie("id") != null) {
   id = getCookie("id");
 }
+
+if (getCookie("url") != null) {
+  url = getCookie("url");
+}
+
+setCookie("url", url, 365);
 
 setCookie("id", id, 365);
 
@@ -34,7 +40,6 @@ if (getCookie("password") != null) {
   
 }
 
-var url = "http://127.0.0.1:8000/";
 
 var people = {}
 
@@ -63,6 +68,7 @@ function send_server_data() {
 }
 
 
+<<<<<<< Updated upstream
 function get_server_data(json) {  
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "get_all", true);
@@ -81,6 +87,9 @@ function get_server_data(json) {
     '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
   );
 function get_server_data(json) {
+=======
+function get_server_data() {
+>>>>>>> Stashed changes
 
   
   
