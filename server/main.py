@@ -174,6 +174,7 @@ if __name__ == "__main__":
     thread.start()
     
     server = HTTPServer(("localhost", 8000), WebRequestHandler)
+    print(f"{server.server_address[0]}:{server.server_address[1]}")
     try:
         server.serve_forever()
     except KeyboardInterrupt as e:

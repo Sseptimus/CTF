@@ -11,11 +11,14 @@ var screenLock = null;
 var myIcon = L.divIcon({ className: "my-div-icon"});
 
 var name = "ollie";
+var team = 1;
+var password = "password";
+var url = "http://127.0.0.1:8000/";
 
 var people = {}
 
 function send_server_data() {
-  {}
+  
 }
 
 function get_server_data(json) {
@@ -33,9 +36,9 @@ function get_server_data(json) {
     if (typeof people[i]['marker'] == "undefined") {
       let className = "div-icon";
       className += " team-"+json[i]['team'];
-      // if (json[i]['connected'] == false) {
-        
-      // }
+      if (json[i]['connected'] == false) {
+        className += " disconnected";
+      }
       people[i]['marker'] = L.marker(people[i]['coord'], {icon:L.divIcon({ className: className})}).addTo(map);
       people[i]['marker'].set
     }
