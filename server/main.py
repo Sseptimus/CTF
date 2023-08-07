@@ -173,7 +173,7 @@ if __name__ == "__main__":
     thread = threading.Thread(target=auto_backup)
     thread.start()
     
-    server = HTTPServer(("localhost", 8000), WebRequestHandler)
+    server = HTTPServer(("localhost", 8100), WebRequestHandler)
     print(f"{server.server_address[0]}:{server.server_address[1]}")
     try:
         server.serve_forever()

@@ -21,8 +21,20 @@ function send_server_data() {
   
 }
 
-function get_server_data(json) {
-  
+function get_server_data(json) {  
+  xhr = new XMLHttpRequest();
+  xhr.open("GET", url + "get_all", true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      json = JSON.parse(xhr.responseText);
+    } else {
+      console.log("error");
+      console.log(xhr);
+    }
+  };
+  xhr.send();
+
   json = JSON.parse(
     '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
   );

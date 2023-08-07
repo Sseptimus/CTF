@@ -1,3 +1,4 @@
 
 sh.exe.stackdump
 *.stackdump
+**/backup.json
