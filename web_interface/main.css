@@ -25,9 +25,8 @@ input {
     font-size: 1em;
     padding: 0.5em;
     min-width: none;
-    height: 1em;
-    width: 1em;
-    padding: 1em;
+    height: 5vw;
+    padding: 5vw;
     background-color: #ffffffd4;
     border: none;
     border-radius: .5em;
@@ -49,8 +48,7 @@ input {
     padding: 1em;
     gap: 1em;
     height: 1em;
-    width: 100%;
-    border: 2px #464646 solid;
+    width: 90%;
 }
 
 .settings {

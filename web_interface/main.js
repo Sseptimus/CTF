@@ -32,6 +32,13 @@ if (getCookie("name") != null) {
 
 setCookie("name", player_name, 365);
 
+if (getCookie("team") != null) {
+  player_name = getCookie("team");
+}
+
+setCookie("team", player_name, 365);
+
+
 
 var password = "";
 
@@ -177,7 +184,7 @@ onload = function () {
     attribution: "© OpenStreetMap",
     }).addTo(map);
     if (marker == undefined) {
-      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "div-icon" + " team-"+team})}).addTo(map);
+      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "player div-icon" + " team-"+team})}).addTo(map);
     
       map.setView(get_coord(), 1.8);
     }
@@ -190,7 +197,7 @@ map.on("click", onMapClick);
 var intervalId = window.setInterval(function () {
 
 
-        send_server_data();
+        // send_server_data();
 
         if (document.getElementById("lock").style.display != 'none') {
             return;
@@ -206,6 +213,7 @@ var intervalId = window.setInterval(function () {
           // }
           people[i]['marker'].setLatLng(people[i]['coord']);
           people[i]['marker'].bindTooltip(i).openTooltip();
+
         }
 
 
@@ -217,10 +225,10 @@ var intervalId = window.setInterval(function () {
             map.setView(coord, 13);
             marker.setLatLng(coord);
             marker.bindTooltip("You").openTooltip();
-        }
-
-        speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
-        now = Date.now();
+          }
+          
+          speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
+          now = Date.now();
 
 
         if (speed > 300) {
@@ -228,10 +236,11 @@ var intervalId = window.setInterval(function () {
             if (coord != [51.505, -0.09]) {
               map.setView(coord, 13);
             }
-        }
-        speed = Math.round(speed * 10) / 10;
-        marker.setLatLng(coord);
-        marker.bindTooltip("You").openTooltip();
+          }
+          speed = Math.round(speed * 10) / 10;
+          marker.setLatLng(coord);
+          marker.bindTooltip("You").openTooltip();
+          marker.setIcon(L.divIcon({ className: "player div-icon" + " team-"+team}));
     
     
     }, 5000);
