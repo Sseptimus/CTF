@@ -27,8 +27,17 @@
       <input placeholder="url" type="url" id="url" onchange="setCookie('url', this.value, 10); url=this.value">
       <input placeholder="password" type="password" id="password" onchange="setCookie('password', this.value, 10); password=this.value">
       <input placeholder="name" type="text" id="name" onchange="setCookie('name', this.value, 10); player_name=this.name">
-      <button class="team-button team-1">team 1</button>
-      <input placeholder="team" type="number" id="team" onchange="setCookie('team', this.value, 10)">
+      <div class="team_buttons">
+        <p>pick team</p>
+        <div class="team_colors">
+      <button class="team-button team-1" onclick="team=1; setCookie('team', 1, 20)"></button>
+      <button class="team-button team-2" onclick="team=2; setCookie('team', 2, 20)"></button>
+      <button class="team-button team-3" onclick="team=3; setCookie('team', 3, 20)"></button>
+      <button class="team-button team-4" onclick="team=4; setCookie('team', 4, 20)"></button>
+      <button class="team-button team-5" onclick="team=5; setCookie('team', 5, 20)"></button>
+      <button class="team-button team-6" onclick="team=6; setCookie('team', 6, 20)"></button>
+      </div>
+      </div>
 
     </div>
 

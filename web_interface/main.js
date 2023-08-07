@@ -9,7 +9,7 @@ var marker = undefined;
 var screenLock = null;
 
 var myIcon = L.divIcon({ className: "my-div-icon"});
-var url = "http://127.0.0.1:8000/";
+var url = "http://127.0.0.1:8100/";
 var player_name = "ollie";
 var team = 1;
 // random number
@@ -68,8 +68,8 @@ function send_server_data() {
 }
 
 
-<<<<<<< Updated upstream
-function get_server_data(json) {  
+function get_server_data() {  
+
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -86,10 +86,6 @@ function get_server_data(json) {
   json = JSON.parse(
     '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
   );
-function get_server_data(json) {
-=======
-function get_server_data() {
->>>>>>> Stashed changes
 
   
   
@@ -173,7 +169,6 @@ onload = function () {
 
 
     document.getElementById("name").value = player_name;
-    document.getElementById("team").value = team;
     document.getElementById("password").value = password;
 
     map = L.map("map").setView([51.505, -0.09], 1);
@@ -182,7 +177,8 @@ onload = function () {
     attribution: "© OpenStreetMap",
     }).addTo(map);
     if (marker == undefined) {
-      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "div-icon"})}).addTo(map);
+      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "div-icon" + " team-"+team})}).addTo(map);
+    
       map.setView(get_coord(), 1.8);
     }
     marker.riseOnHover = true;
