@@ -9,7 +9,7 @@ var marker = undefined;
 var screenLock = null;
 
 var myIcon = L.divIcon({ className: "my-div-icon"});
-var url = "http://127.0.0.1:8100/";
+var url = "http://127.0.0.1:8100";
 var player_name = "ollie";
 var team = 1;
 // random number
@@ -54,7 +54,7 @@ function send_server_data() {
   // send data to server
   var data = {team: team, coord: coord};
   xhr = new XMLHttpRequest();
-  xhr.open("POST", url + "set_data?player_id=" + id, true);
+  xhr.open("POST", url + "/set_data?player_id=" + id, true);
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onreadystatechange = function () {
@@ -78,7 +78,7 @@ function send_server_data() {
 function get_server_data() {  
 
   xhr = new XMLHttpRequest();
-  xhr.open("GET", url + "get_all", true);
+  xhr.open("GET", url + "/get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
   xhr.onreadystatechange = function () {
     if (xhr.readyState == 4 && xhr.status == 200) {
@@ -185,7 +185,6 @@ onload = function () {
     }).addTo(map);
     if (marker == undefined) {
       marker = L.marker(get_coord(), {icon: L.divIcon({ className: "player div-icon" + " team-"+team})}).addTo(map);
-    
       map.setView(get_coord(), 1.8);
     }
     marker.riseOnHover = true;
@@ -203,7 +202,7 @@ var intervalId = window.setInterval(function () {
             return;
         }
 
-        // get_server_data();
+        get_server_data();
 
 
         for (i in people) {
@@ -255,7 +254,7 @@ function get_coord() {
         // get users lat/long
         
         var getPosition = {
-          enableHighAccuracy: true,
+          enableHighAccuracy: false,
           timeout: 9000,
           maximumAge: 0
         };
@@ -274,8 +273,6 @@ function get_coord() {
 
         return [uLat, uLon];
     }
-
-
 
 
 function deg2rad(deg) {
@@ -321,4 +318,28 @@ function stopWebCam() {
   }
 
   stream = null;
+}
+
+
+function show_people() {
+  let min_lat = coord[0];
+  let max_lat = coord[0];
+  let min_lon = coord[1];
+  let max_lon = coord[1];
+  for (i in people) {
+    if (people[i]['coord'][0] < min_lat) {
+      min_lat = people[i]['coord'][0];
+    }
+    if (people[i]['coord'][0] > max_lat) {
+      max_lat = people[i]['coord'][0];
+    }
+    if (people[i]['coord'][1] < min_lon) {
+      min_lon = people[i]['coord'][1];
+    }
+    if (people[i]['coord'][1] > max_lon) {
+      max_lon = people[i]['coord'][1];
+    }
+  }
+
+  map.fitBounds([[min_lat-0.1, min_lon-0.1], [max_lat+0.1, max_lon+0.1]]);
 }
