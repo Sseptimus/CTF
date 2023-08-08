@@ -1,3 +1,4 @@
+
 var map;
 var coord;
 var video_on = false;
@@ -6,11 +7,36 @@ var vetoed = false;
 var currentChallenge = 0;
 var marker = undefined;
 var screenLock = null;
+var flag = undefined;
 
 var myIcon = L.divIcon({ className: "my-div-icon" });
 var url = "http://127.0.0.1:8100";
 var player_name = "ollie";
 var team = 1;
+var polygon = undefined;
+
+var ready = false;
+var started = false;
+
+
+
+var flag_pos = [0, 0];
+
+if (getCookie("flag_pos") != null) {
+  flag_pos = getCookie("flag_pos").split(",");
+  for (i in flag_pos) {
+    flag_pos[i] = parseFloat(flag_pos[i]);
+  }
+}
+
+setCookie("flag_pos", flag_pos, 365);
+
+var password = "";
+
+if (getCookie("password") != null) {
+  password = getCookie("password");
+}
+
 // random number
 var id = Math.floor(Math.random() * 1000000000);
 if (getCookie("id") != null) {
@@ -37,18 +63,15 @@ if (getCookie("team") != null) {
 
 setCookie("team", player_name, 365);
 
-var password = "";
 
-if (getCookie("password") != null) {
-  password = getCookie("password");
-}
+var bounds = [[0,0],0];
 
-
-var people = {};
+var people = {
+  
+};
 
 function send_server_data() {
   // send data to server
-  var data = { team: team, coord: coord };
   xhr = new XMLHttpRequest();
   xhr.open("POST", url + "/set_data?player_id=" + id, true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -63,11 +86,11 @@ function send_server_data() {
 
   // Converting JSON data to string
   var data = JSON.stringify({
-    player_name: { coord: coord, team: team },
+    player_name: { coord: coord, team: team , flag_pos, ready: ready},
     password: getPasswordFromCookie(),
   });
+
   data = data.replace("name", player_name);
-  console.log(data);
 
   // Sending data with the request
   xhr.send(data);
@@ -102,7 +125,14 @@ function processXhrError(xhr) {
   }
 }
 
+
 function get_server_data() {
+
+  json = {};
+
+
+  json = JSON.parse('{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]}}');
+
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "/get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -113,15 +143,15 @@ function get_server_data() {
     if (xhr.readyState == 4 && xhr.status == 200) {
       json = JSON.parse(xhr.responseText);
     } else {
-      console.log("error");
       console.log(xhr);
     }
   };
+
+
   xhr.send("Hello World!");
 
-  json = JSON.parse(
-    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.85,174.847], "team":2, "connected":false}}'
-  );
+
+
 
   console.log(json);
   // add json to people
@@ -130,6 +160,7 @@ function get_server_data() {
       people[i] = {};
     }
     people[i]["coord"] = json[i]["coord"];
+    people[i]["flag"] = json[i]["flag"];
     if (typeof people[i]["marker"] == "undefined") {
       let className = "div-icon";
       className += " team-" + json[i]["team"];
@@ -140,7 +171,29 @@ function get_server_data() {
         icon: L.divIcon({ className: className }),
       }).addTo(map);
       people[i]["marker"].set;
+
     }
+    if (typeof people[i]["flag_marker"] == "undefined") {
+      people[i]["flag_marker"] = L.marker(people[i]["flag"], {
+        icon: L.divIcon({ className: "enemy-flag flag-icon team-" + json[i]["team"] }),
+      }).addTo(map);
+
+      people[i]["flag_marker"].set;
+      people[i]["flag_marker"].setOpacity(0.0);
+
+    }
+
+    if (typeof people[i]["flag_is_captured"] == "undefined") {
+      people[i]["flag_is_captured"] = false;
+    }
+
+    if (people[i]["flag_is_captured"]) {
+      people[i]["flag_marker"].setOpacity(0.0);
+    }
+
+
+
+    
   }
 }
 
@@ -199,6 +252,7 @@ onload = function () {
   lock = document.getElementById("lock");
   lock.style.display = "none";
 
+
   document.getElementById("name").value = player_name;
   document.getElementById("password").value = password;
 
@@ -215,12 +269,30 @@ onload = function () {
   }
   marker.riseOnHover = true;
   coord = get_coord();
-  function onMapClick(e) {
-    // alert("You clicked the map at " + e.latlng);
-  }
-  map.on("click", onMapClick);
+
+
+
+  flag = L.marker([51.505, -0.09], {
+    icon: L.divIcon({
+      className: "flag-icon",
+      draggable: true,
+      // autoPan: true
+    }),
+  }).addTo(map);
+  flag.dragging.enable();
+
+
+  flag.on("dragend", function (e) {
+    flag_pos = flag.getLatLng();
+    flag_pos = [flag_pos.lat, flag_pos.lng];
+    get_bounds();
+  });
+
+
+  polygon = L.polygon([[0,0],[0,0],[0,0]]).addTo(map);
+
   var intervalId = window.setInterval(function () {
-    // send_server_data();
+    send_server_data();
 
     if (document.getElementById("lock").style.display != "none") {
       return;
@@ -229,13 +301,11 @@ onload = function () {
     get_server_data();
 
     for (i in people) {
-      // if (typeof people[i].marker == "undefined") {
-      //   console.log("marker undefined", people[i]['coord']);
-      //   people[i]['marker'] = L.marker(people[i]['coord']).addTo(map);
-      // }
       people[i]["marker"].setLatLng(people[i]["coord"]);
       people[i]["marker"].bindTooltip(i).openTooltip();
     }
+
+
 
     old_coord = coord;
     coord = get_coord();
@@ -244,6 +314,34 @@ onload = function () {
       marker.setLatLng(coord);
       marker.bindTooltip("You").openTooltip();
     }
+
+    if (!ready) {
+      flag.bindTooltip("Your Flag").openTooltip();
+      try {
+      bounds = get_bounds();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    if (ready) {
+      all_ready = false 
+      for (i in people) {
+        console.log(people[i]["ready"]);
+        if (!people[i]["ready"]) {
+
+          all_ready = false;
+          break;
+        }
+        all_ready = true;
+      }
+    }
+
+    if (bounds.length > 3) {
+    polygon.setLatLngs(bounds);
+    }
+
+    
 
     speed =
       (map.distance(
@@ -300,7 +398,114 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
+function endGame() {
+  ready = false;
+  password = "";
+  document.getElementById("ready").style.display = "block";
+}
+
+function startGame() {
+  if (people.length < 2) {
+    alert("Not enough players in server");
+    return;
+  }
+  ready = true;
+  document.getElementById("ready").style.display = "none";
+  window.polygon.remove();
+  L.polyline(get_bounds(), { color: "red" }).addTo(map);
+  
+  for (i in people) {
+    opacity = 1.0;
+    if (people[i]["team"] == team) {
+      opacity = 0.4;
+    }
+    people[i]["flag_marker"].setOpacity(opacity);
+  }
+
+  map.removeLayer(flag);
+
+  
+  
+}
+
 var constraints = { audio: false, video: true };
+
+function get_bounds() {
+  average_lat = coord[0];
+  average_lon = coord[1];
+  for (i in people) {
+    average_lat += people[i]["coord"][0];
+    average_lon += people[i]["coord"][1];
+  }
+
+  if (Object.keys(people).length == 0) {
+    average_lat = coord[0];
+    average_lon = coord[1];
+  }else {
+  average_lat /= (Object.keys(people).length+1);
+  average_lon /= (Object.keys(people).length+1);
+  }
+
+  var max_distance = 0;
+
+  for (i in people) {
+    distance = map.distance(
+      L.latLng(average_lat, average_lon),
+      L.latLng(people[i]["coord"][0], people[i]["coord"][1])
+    );
+    if (distance > max_distance) {
+      max_distance = distance;
+    }
+  }
+
+  max_distance += 3000;
+
+  max_distance = Math.max(max_distance, 5000);
+
+  if (map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) > max_distance) {
+
+    for (i=0; i<30; i++) {
+      if (
+        map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) <
+        max_distance
+      ) {break}
+        x = average_lat - flag_pos[0];
+    y=average_lon-flag_pos[1];
+
+    flag_pos[0]+=x/5;
+    flag_pos[1]+=y/5;
+
+
+    flag.setLatLng(flag_pos);
+    }
+  }
+
+  var numberOfPoints = 30;
+
+    var radiusLon = 1 / (111.319 * Math.cos(average_lat * (Math.PI / 180))) * (max_distance/1000);
+    var radiusLat = (1 / 110.574) * (max_distance/1000);
+
+  var dTheta = (2 * Math.PI) / numberOfPoints;
+
+
+  
+  theta = 0;
+
+  var points = [];
+    for (var i = 0; i < numberOfPoints; i++)
+    {
+        points.push(
+          L.latLng(
+            average_lat + radiusLat * Math.sin(theta),
+            average_lon + radiusLon * Math.cos(theta)
+          )
+        );
+        theta += dTheta;
+    }
+
+  return points;
+
+}
 
 function successCallback(stream) {
   video.srcObject = stream;
@@ -365,4 +570,5 @@ function show_people() {
     [min_lat - 0.03, min_lon - 0.03],
     [max_lat + 0.03, max_lon + 0.03],
   ]);
+  
 }

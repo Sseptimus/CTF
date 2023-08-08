@@ -10,9 +10,10 @@ body {
 
 .close-settings {
     position: absolute;
-    z-index: 4;
+    z-index: 5;
     right: 1em;
-    bottom: 1em;
+    bottom: 3em;
+    border: #f64545a7 2px solid;
 }
 
 input {
@@ -88,16 +89,18 @@ input {
 
 .server_status {
     position: absolute;
-    z-index: 4;
+    z-index: 3;
     right: 1em;
     bottom: 1em;
     font-size: x-large;
     background-color: #ffffffd4;
     border: none;
     border-radius: .5em;
+    font-size: small;
     padding: 0.5em;
     pointer-events: none;
 }
+
 
 .lock::after:disabled {
     content: "Locked";
@@ -255,8 +258,15 @@ input {
 } */
 
 
-.has-flag {
-
+.flag-icon {
+        width: 0px;
+    height: 0px;
+    padding: 0em;
+    border-radius: 50% 50% 50% 50%;
+    border: 2px solid black;
+    margin: 0;
+    background:repeating-conic-gradient(#ffffff00 0% 25%, #000000 0% 50%) 50% / 20px 20px;
+    background-color: #ffffff;
 }
 
 .disconnected {
@@ -308,7 +318,7 @@ input {
     background-color: #57f2c1;
 }
 .team-6 {
-    background-color: #dfa644;
+    background-color: #ffed49;
 }
 .team-7 {
     background-color: #a1a1e1;
