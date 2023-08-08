@@ -104,7 +104,7 @@ function processXhrError(xhr) {
 
 function get_server_data() {
   xhr = new XMLHttpRequest();
-  xhr.open("GET", url + "get_all", true);
+  xhr.open("GET", url + "/get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
   xhr.setRequestHeader("password", getPasswordFromCookie());
 

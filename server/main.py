@@ -10,7 +10,7 @@ import time
 
 PORT = 8100
 DOMAIN = "localhost"
-CORS_ALLOW_ORIGIN = "http://127.0.0.1:5500"
+CORS_ALLOW_ORIGIN = "*"
 
 def generate_random_string(length):
     chars = "abcdefghijklmnopqrstuvwxyz0123456789"
