@@ -77,6 +77,28 @@ def handle_json_set_post(handler):
 
     handler.do_Ok()
 
+def handle_reset_hard(handler):
+    global PLAYER_DATA
+    
+    print("Received request to reset!")
+    
+    backup_name = "backup_" + str(int(time.time())) + ".json"
+    
+    print("Backing up to", backup_name)
+    
+    with open(backup_name, "w") as f:
+        f.write(json.dumps(PLAYER_DATA))
+        
+    print("Resetting")
+    
+    PLAYER_DATA = {}
+    
+    handler.send_response(200)
+    handler.send_header("Content-Type", "text/plain")
+    handler.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+    handler.send_header("Access-Control-Allow-Credentials", "true")
+    handler.end_headers()
+    handler.wfile.write(b"Reset complete - saved backup to " + backup_name.encode("utf-8"))
 
 def handle_json_get(handler):
     player_id = int(handler.query_data["player_id"])
@@ -105,6 +127,7 @@ def handle_get_all(handler):
 
 POST_ROUTES = {
     "/set_data": handle_json_set_post,
+    "/reset_hard": handle_reset_hard,
 }
 
 GET_ROUTES = {
@@ -239,6 +262,8 @@ def auto_backup():
 
 if __name__ == "__main__":
     from http.server import HTTPServer
+    
+    load_backup()
 
     # Launch backup thread
     thread = threading.Thread(target=auto_backup)

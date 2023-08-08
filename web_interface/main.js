@@ -38,9 +38,9 @@ if (getCookie("password") != null) {
 }
 
 // random number
-var id = Math.floor(Math.random() * 1000000000);
+var myId = Math.floor(Math.random() * 1000000000);
 if (getCookie("id") != null) {
-  id = getCookie("id");
+  myId = getCookie("id");
 }
 
 if (getCookie("url") != null) {
@@ -49,7 +49,7 @@ if (getCookie("url") != null) {
 
 setCookie("url", url, 365);
 
-setCookie("id", id, 365);
+setCookie("id", myId, 365);
 
 if (getCookie("name") != null) {
   player_name = getCookie("name");
@@ -58,10 +58,10 @@ if (getCookie("name") != null) {
 setCookie("name", player_name, 365);
 
 if (getCookie("team") != null) {
-  player_name = getCookie("team");
+  team = getCookie("team");
 }
 
-setCookie("team", player_name, 365);
+setCookie("team", team, 365);
 
 
 var bounds = [[0,0],0];
@@ -73,24 +73,24 @@ var people = {
 function send_server_data() {
   // send data to server
   xhr = new XMLHttpRequest();
-  xhr.open("POST", url + "/set_data?player_id=" + id, true);
+  xhr.open("POST", url + "/set_data?player_id=" + myId, true);
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onreadystatechange = function () {
     processXhrError(xhr);
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      // Print received data from server
-      console.log(this.responseText);
-    }
   };
 
   // Converting JSON data to string
   var data = JSON.stringify({
-    player_name: { coord: coord, team: team , flag_pos, ready: ready},
+    coord: coord, 
+    team: team, 
+    flag_pos, 
+    ready: ready,
+    name: player_name,
+    connected: true,
+
     password: getPasswordFromCookie(),
   });
-
-  data = data.replace("name", player_name);
 
   // Sending data with the request
   xhr.send(data);
@@ -111,7 +111,6 @@ function setServerStatus(status, color) {
 }
 
 function processXhrError(xhr) {
-  console.log(`readyState: ${xhr.readyState}, status: ${xhr.status}`);
   if (xhr.readyState == 4 && xhr.status == 200) {
     setServerStatus("Connected", "green");
   } else if (xhr.readyState == 4 && xhr.status == 0) {
@@ -125,14 +124,56 @@ function processXhrError(xhr) {
   }
 }
 
+function makePlayerIcons(player) {
+  if (typeof player["marker"] == "undefined") {
+    let className = "div-icon";
+    className += " team-" + player["team"];
 
-function get_server_data() {
+    if (player["connected"] == false) {
+      className += " disconnected";
+    }
 
-  json = {};
+    player["marker"] = L.marker(player["coord"], {
+      icon: L.divIcon({ className: className }),
+    }).addTo(map);
 
+    player["marker"].bindTooltip(player["name"]).openTooltip();
+  } else {
+    player["marker"].setLatLng(player["coord"]);
 
-  json = JSON.parse('{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]}}');
+    if (!player["marker"].isTooltipOpen()) {
+      player["marker"].openTooltip();
+    }
+  }
 
+  if (typeof player["flag_marker"] == "undefined") {
+    player["flag_marker"] = L.marker(player["flag_pos"], {
+      icon: L.divIcon({ className: "enemy-flag flag-icon team-" + player["team"] }),
+    }).addTo(map);
+    player["flag_marker"].bindTooltip(player["name"] + "'s flag").openTooltip();
+    player["flag_marker"].setOpacity(0.0);
+  } else {
+    player["flag_marker"].setLatLng(player["flag_pos"]);
+
+    if (!player["flag_marker"].isTooltipOpen()) {
+      player["flag_marker"].openTooltip();
+    }
+  }
+}
+
+function validatePlayerJson(json) {
+  REQUIRES_KEYS = ["coord", "flag_pos", "name", "team", "ready", "connected"];
+
+  for (key in REQUIRES_KEYS) {
+    if (typeof json[REQUIRES_KEYS[key]] == "undefined") {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getServerData() {
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "/get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -142,59 +183,32 @@ function get_server_data() {
     processXhrError(xhr);
     if (xhr.readyState == 4 && xhr.status == 200) {
       json = JSON.parse(xhr.responseText);
-    } else {
-      console.log(xhr);
+
+      // add json to people
+      for (playerId in json) {
+        if (!validatePlayerJson(json[playerId])) {
+          continue;
+        }
+
+        if (playerId == myId) continue;
+
+        if (typeof people[playerId] == "undefined") {
+          people[playerId] = {};
+        }
+
+        people[playerId]["coord"] = json[playerId]["coord"];
+        people[playerId]["flag_pos"] = json[playerId]["flag_pos"];
+        people[playerId]["name"] = json[playerId]["name"];
+        people[playerId]["team"] = json[playerId]["team"];
+        people[playerId]["ready"] = json[playerId]["ready"];
+        people[playerId]["connected"] = json[playerId]["connected"];
+
+        makePlayerIcons(people[playerId]);
+      }
     }
   };
 
-
-  xhr.send("Hello World!");
-
-
-
-
-  console.log(json);
-  // add json to people
-  for (i in json) {
-    if (typeof people[i] == "undefined") {
-      people[i] = {};
-    }
-    people[i]["coord"] = json[i]["coord"];
-    people[i]["flag"] = json[i]["flag"];
-    if (typeof people[i]["marker"] == "undefined") {
-      let className = "div-icon";
-      className += " team-" + json[i]["team"];
-      if (json[i]["connected"] == false) {
-        className += " disconnected";
-      }
-      people[i]["marker"] = L.marker(people[i]["coord"], {
-        icon: L.divIcon({ className: className }),
-      }).addTo(map);
-      people[i]["marker"].set;
-
-    }
-    if (typeof people[i]["flag_marker"] == "undefined") {
-      people[i]["flag_marker"] = L.marker(people[i]["flag"], {
-        icon: L.divIcon({ className: "enemy-flag flag-icon team-" + json[i]["team"] }),
-      }).addTo(map);
-
-      people[i]["flag_marker"].set;
-      people[i]["flag_marker"].setOpacity(0.0);
-
-    }
-
-    if (typeof people[i]["flag_is_captured"] == "undefined") {
-      people[i]["flag_is_captured"] = false;
-    }
-
-    if (people[i]["flag_is_captured"]) {
-      people[i]["flag_marker"].setOpacity(0.0);
-    }
-
-
-
-    
-  }
+  xhr.send();
 }
 
 function setCookie(name, value, days) {
@@ -298,12 +312,7 @@ onload = function () {
       return;
     }
 
-    get_server_data();
-
-    for (i in people) {
-      people[i]["marker"].setLatLng(people[i]["coord"]);
-      people[i]["marker"].bindTooltip(i).openTooltip();
-    }
+    getServerData();
 
 
 
