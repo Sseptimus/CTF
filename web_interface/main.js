@@ -59,6 +59,7 @@ function send_server_data() {
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onreadystatechange = function () {
+    processXhrError(xhr);
     if (xhr.readyState === 4 && xhr.status === 200) {
       // Print received data from server
       console.log(this.responseText);
@@ -82,15 +83,37 @@ function getPasswordFromCookie() {
   return password;
 }
 
+function setServerStatus(status, color) {
+  const element = document.getElementById("server_status");
+
+  element.innerText = status;
+  element.style.color = color;
+}
+
+function processXhrError(xhr) {
+  console.log(`readyState: ${xhr.readyState}, status: ${xhr.status}`);
+  if (xhr.readyState == 4 && xhr.status == 200) {
+    setServerStatus("Connected", "green");
+  } else if (xhr.readyState == 4 && xhr.status == 0) {
+    setServerStatus("Server not found", "red"); 
+  } else if (xhr.status == 401) {
+    setServerStatus("Wrong password", "red");
+  } else if (xhr.status == 404) {
+    setServerStatus("Server not found", "red");
+  } else {
+    setServerStatus("Server error", "red");
+  }
+}
+
 function get_server_data() {  
 
   xhr = new XMLHttpRequest();
-  xhr.open("GET", url + "/get_all", true);
+  xhr.open("GET", url + "get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
-  
-  const data = JSON.stringify({ password: getPasswordFromCookie() });
+  xhr.setRequestHeader("password", getPasswordFromCookie());
 
   xhr.onreadystatechange = function () {
+    processXhrError(xhr);
     if (xhr.readyState == 4 && xhr.status == 200) {
       json = JSON.parse(xhr.responseText);
     } else {
@@ -98,7 +121,7 @@ function get_server_data() {
       console.log(xhr);
     }
   };
-  xhr.send(data);
+  xhr.send("Hello World!");
 
   json = JSON.parse(
     '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.85,174.847], "team":2, "connected":false}}'

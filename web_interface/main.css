@@ -86,6 +86,20 @@ input {
     top: 1em;
 }
 
+.server_status {
+    position: absolute;
+    z-index: 4;
+    right: 1em;
+    bottom: 1em;
+
+    font-size: x-large;
+    background-color: #ffffffd4;
+    border: none;
+    border-radius: .5em;
+    padding: 0.5em;
+    pointer-events: fill;
+}
+
 .lock::after:disabled {
     content: "Locked";
 }

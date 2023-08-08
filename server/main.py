@@ -8,8 +8,9 @@ import json
 import threading
 import time
 
-
-
+PORT = 8100
+DOMAIN = "localhost"
+CORS_ALLOW_ORIGIN = "http://127.0.0.1:5500"
 
 def generate_random_string(length):
     chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -87,7 +88,8 @@ def handle_json_get(handler):
     else:
         handler.send_response(200)
         handler.send_header("Content-Type", "application/json")
-        handler.send_header("Access-Control-Allow-Origin", "*")
+        handler.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+        handler.send_header("Access-Control-Allow-Credentials", "true")
         handler.end_headers()
         handler.wfile.write(json.dumps(data).encode("utf-8"))
 
@@ -95,7 +97,8 @@ def handle_json_get(handler):
 def handle_get_all(handler):
     handler.send_response(200)
     handler.send_header("Content-Type", "application/json")
-    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+    handler.send_header("Access-Control-Allow-Credentials", "true")
     handler.end_headers()
     handler.wfile.write(json.dumps(PLAYER_DATA).encode("utf-8"))
 
@@ -137,15 +140,24 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     @cached_property
     def cookies(self):
         cookies = SimpleCookie(self.headers.get("Cookie"))
-        print(cookies)
         return cookies
 
     def verify_password(self):
         valid = False
 
+        password = None
         if "password" in self.cookies:
             password = self.cookies["password"].value
             valid = password == PASSWORD
+            
+        #Get from headers
+        if not valid:
+            try:
+                if "password" in self.headers:
+                    password = self.headers["password"]
+                    valid = password == PASSWORD
+            except:
+                pass
 
         try:
             if "password" in self.json_data:
@@ -156,8 +168,18 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
         if not valid:
             self.send_response(401)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+            self.send_header("Access-Control-Allow-Credentials", "true")
             self.end_headers()
             self.wfile.write(b"Unauthorized")
+            
+            print("Auth failed")
+            if password is not None:
+                print("Password:", password, "Expected: ", PASSWORD)
+            else:
+                print("No password supplied")
+                print("Body:", self.post_data.decode("utf-8"))
 
         return valid
 
@@ -182,22 +204,25 @@ class WebRequestHandler(BaseHTTPRequestHandler):
     def do_404(self):
         self.send_response(404)
         self.send_header("Content-Type", "text/plain")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+        self.send_header("Access-Control-Allow-Credentials", "true")
         self.end_headers()
         self.wfile.write(b"Not found")
 
     def do_Ok(self):
         self.send_response(200)
         self.send_header("Content-Type", "text/plain")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+        self.send_header("Access-Control-Allow-Credentials", "true")
         self.end_headers()
         self.wfile.write(b"Ok")
         
     def do_OPTIONS(self):
         self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
         self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type, password")
+        self.send_header("Access-Control-Allow-Credentials", "true")
         self.end_headers()
         
     
@@ -219,7 +244,7 @@ if __name__ == "__main__":
     thread = threading.Thread(target=auto_backup)
     thread.start()
     
-    server = HTTPServer(("localhost", 8100), WebRequestHandler)
+    server = HTTPServer((DOMAIN, PORT), WebRequestHandler)
     print(f"{server.server_address[0]}:{server.server_address[1]}")
     print(f"Password: {PASSWORD}")
     try:
