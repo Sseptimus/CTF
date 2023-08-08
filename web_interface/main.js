@@ -91,7 +91,7 @@ function get_server_data() {
   xhr.send();
 
   json = JSON.parse(
-    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
+    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.85,174.847], "team":2, "connected":false}}'
   );
 
   
@@ -341,5 +341,5 @@ function show_people() {
     }
   }
 
-  map.fitBounds([[min_lat-0.1, min_lon-0.1], [max_lat+0.1, max_lon+0.1]]);
+  map.fitBounds([[min_lat-0.03, min_lon-0.03], [max_lat+0.03, max_lon+0.03]]);
 }
