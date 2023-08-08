@@ -9,7 +9,7 @@ var marker = undefined;
 var screenLock = null;
 
 var myIcon = L.divIcon({ className: "my-div-icon"});
-
+var url = "http://127.0.0.1:8100";
 var player_name = "ollie";
 var team = 1;
 // random number
@@ -18,6 +18,12 @@ if (getCookie("id") != null) {
   id = getCookie("id");
 }
 
+if (getCookie("url") != null) {
+  url = getCookie("url");
+}
+
+setCookie("url", url, 365);
+
 setCookie("id", id, 365);
 
 if (getCookie("name") != null) {
@@ -25,6 +31,13 @@ if (getCookie("name") != null) {
 }
 
 setCookie("name", player_name, 365);
+
+if (getCookie("team") != null) {
+  player_name = getCookie("team");
+}
+
+setCookie("team", player_name, 365);
+
 
 
 var password = "";
@@ -42,7 +55,7 @@ function send_server_data() {
   // send data to server
   var data = {team: team, coord: coord};
   xhr = new XMLHttpRequest();
-  xhr.open("POST", url + "set_data?player_id=" + id, true);
+  xhr.open("POST", url + "/set_data?player_id=" + id, true);
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onreadystatechange = function () {
@@ -69,9 +82,10 @@ function getPasswordFromCookie() {
   return password;
 }
 
-function get_server_data(json) {  
+function get_server_data() {  
+
   xhr = new XMLHttpRequest();
-  xhr.open("GET", url + "get_all", true);
+  xhr.open("GET", url + "/get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
   
   const data = JSON.stringify({ password: getPasswordFromCookie() });
@@ -87,7 +101,7 @@ function get_server_data(json) {
   xhr.send(data);
 
   json = JSON.parse(
-    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.5,174.447], "team":2, "connected":false}}'
+    '{"nick":{"coord":[-36.8,174.747], "team":1, "connected":true},"seb":{"coord":[-36.85,174.847], "team":2, "connected":false}}'
   );
 
   console.log(json);
@@ -169,7 +183,6 @@ onload = function () {
 
 
     document.getElementById("name").value = player_name;
-    document.getElementById("team").value = team;
     document.getElementById("password").value = password;
 
     map = L.map("map").setView([51.505, -0.09], 1);
@@ -178,7 +191,7 @@ onload = function () {
     attribution: "© OpenStreetMap",
     }).addTo(map);
     if (marker == undefined) {
-      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "div-icon"})}).addTo(map);
+      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "player div-icon" + " team-"+team})}).addTo(map);
       map.setView(get_coord(), 1.8);
     }
     marker.riseOnHover = true;
@@ -190,13 +203,13 @@ map.on("click", onMapClick);
 var intervalId = window.setInterval(function () {
 
 
-        send_server_data();
+        // send_server_data();
 
         if (document.getElementById("lock").style.display != 'none') {
             return;
         }
 
-        // get_server_data();
+        get_server_data();
 
 
         for (i in people) {
@@ -206,6 +219,7 @@ var intervalId = window.setInterval(function () {
           // }
           people[i]['marker'].setLatLng(people[i]['coord']);
           people[i]['marker'].bindTooltip(i).openTooltip();
+
         }
 
 
@@ -217,10 +231,10 @@ var intervalId = window.setInterval(function () {
             map.setView(coord, 13);
             marker.setLatLng(coord);
             marker.bindTooltip("You").openTooltip();
-        }
-
-        speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
-        now = Date.now();
+          }
+          
+          speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
+          now = Date.now();
 
 
         if (speed > 300) {
@@ -228,10 +242,11 @@ var intervalId = window.setInterval(function () {
             if (coord != [51.505, -0.09]) {
               map.setView(coord, 13);
             }
-        }
-        speed = Math.round(speed * 10) / 10;
-        marker.setLatLng(coord);
-        marker.bindTooltip("You").openTooltip();
+          }
+          speed = Math.round(speed * 10) / 10;
+          marker.setLatLng(coord);
+          marker.bindTooltip("You").openTooltip();
+          marker.setIcon(L.divIcon({ className: "player div-icon" + " team-"+team}));
     
     
     }, 5000);
@@ -246,7 +261,7 @@ function get_coord() {
         // get users lat/long
         
         var getPosition = {
-          enableHighAccuracy: true,
+          enableHighAccuracy: false,
           timeout: 9000,
           maximumAge: 0
         };
@@ -265,8 +280,6 @@ function get_coord() {
 
         return [uLat, uLon];
     }
-
-
 
 
 function deg2rad(deg) {
@@ -312,4 +325,28 @@ function stopWebCam() {
   }
 
   stream = null;
+}
+
+
+function show_people() {
+  let min_lat = coord[0];
+  let max_lat = coord[0];
+  let min_lon = coord[1];
+  let max_lon = coord[1];
+  for (i in people) {
+    if (people[i]['coord'][0] < min_lat) {
+      min_lat = people[i]['coord'][0];
+    }
+    if (people[i]['coord'][0] > max_lat) {
+      max_lat = people[i]['coord'][0];
+    }
+    if (people[i]['coord'][1] < min_lon) {
+      min_lon = people[i]['coord'][1];
+    }
+    if (people[i]['coord'][1] > max_lon) {
+      max_lon = people[i]['coord'][1];
+    }
+  }
+
+  map.fitBounds([[min_lat-0.03, min_lon-0.03], [max_lat+0.03, max_lon+0.03]]);
 }

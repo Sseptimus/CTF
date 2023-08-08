@@ -21,6 +21,36 @@ input {
     min-width: none;
 }
 
+.team-button {
+    font-size: 1em;
+    padding: 0.5em;
+    min-width: none;
+    height: 5vw;
+    padding: 5vw;
+    background-color: #ffffffd4;
+    border: none;
+    border-radius: .5em;
+    pointer-events: fill;
+}
+
+.team_colors {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
+.team_buttons {
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: wrap; */
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 1em;
+    gap: 1em;
+    height: 1em;
+    width: 90%;
+}
+
 .settings {
     display: none;
     z-index: 3;

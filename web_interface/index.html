@@ -24,9 +24,20 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M232,144a64.07,64.07,0,0,1-64,64H80a8,8,0,0,1,0-16h88a48,48,0,0,0,0-96H51.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,85.66,45.66L51.31,80H168A64.07,64.07,0,0,1,232,144Z"></path></svg>
 
       </button>
-      <input placeholder="password" type="text" id="password" onchange="setCookie('password', this.value, 10)">
-      <input placeholder="name" type="text" id="name" onchange="setCookie('name', this.value, 10)">
-      <input placeholder="team" type="number" id="team" onchange="setCookie('team', this.value, 10)">
+      <input placeholder="url" type="url" id="url" onchange="setCookie('url', this.value, 10); url=this.value">
+      <input placeholder="password" type="password" id="password" onchange="setCookie('password', this.value, 10); password=this.value">
+      <input placeholder="name" type="text" id="name" onchange="setCookie('name', this.value, 10); player_name=this.name">
+      <div class="team_buttons">
+        <p>pick team</p>
+        <div class="team_colors">
+      <button class="team-button team-1" onclick="team=1; setCookie('team', 1, 20)"></button>
+      <button class="team-button team-2" onclick="team=2; setCookie('team', 2, 20)"></button>
+      <button class="team-button team-3" onclick="team=3; setCookie('team', 3, 20)"></button>
+      <button class="team-button team-4" onclick="team=4; setCookie('team', 4, 20)"></button>
+      <button class="team-button team-5" onclick="team=5; setCookie('team', 5, 20)"></button>
+      <button class="team-button team-6" onclick="team=6; setCookie('team', 6, 20)"></button>
+      </div>
+      </div>
 
     </div>
 
@@ -91,6 +102,7 @@
     <button onclick="
     try {
         map.setView(coord, 12);
+        show_people();
     }catch(err) {
         console.log(err, coord);
     }
