@@ -293,7 +293,7 @@ onload = function () {
     get_bounds();
   });
 
-  team_polygons = {};
+  var team_polygons = {};
 
   polygon = L.polygon([[0,0],[0,0],[0,0]]).addTo(map);
 
@@ -344,15 +344,20 @@ onload = function () {
       }
     }
 
-    if (bounds.outer.length > 3) {
-    polygon.setLatLngs(bounds.outer);
-    }
+    // if (bounds.outer.length > 3) {
+    // polygon.setLatLngs(bounds.outer);
+    // }
 
     for (i in bounds.teams) {
+      console.log(bounds.teams);
       if (typeof team_polygons[i] == "undefined") {
-        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: "red"}).addTo(map);
+        color = ["red", "blue", "#30eb30", "#de3bde", "#57f2c1", "#ffed49"][
+          bounds.teams[i].team-1
+        ];
+
+        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color}).addTo(map);
       }
-      team_polygons[i].setLatLngs(bounds.teams[i]);
+      team_polygons[i].setLatLngs(bounds.teams[i].polygon);
     }
 
     
@@ -533,18 +538,20 @@ function get_bounds() {
     }
   }
 
-  var numberOfPoints = 30;
+  var numberOfPoints = 60;
 
     var radiusLon = 1 / (111.319 * Math.cos(average_lat * (Math.PI / 180))) * (max_distance/1000);
     var radiusLat = (1 / 110.574) * (max_distance/1000);
 
   var dTheta = (2 * Math.PI) / numberOfPoints;
 
-  var dThetaTeam = (2 * Math.PI) / (teams.length);
 
   var team_split_point = 0;
   var teamThetaBest = 0;
 
+  
+  team_number_list = Object.keys(teams);
+team_number_list.sort();
   
   
   for (t in teams) {
@@ -552,11 +559,9 @@ function get_bounds() {
       L.latLng(average_lat, average_lon),
       L.latLng(teams[t]["center"][0], teams[t]["center"][1])
       );
+    teams[t]["polygon"] = [];
     }
-    team_number_list = Object.keys(teams);
-  team_number_list.sort();
-    
-  if (teams.length == 1) {
+  if (team_number_list.length == 1) {
     teamTheta = 0;
   }
 
@@ -574,8 +579,8 @@ function get_bounds() {
           );
       
       point_mini = L.latLng(
-        average_lat + 300 * Math.sin(theta),
-        average_lon + 300 * Math.cos(theta)
+        average_lat + (radiusLat / 10) * Math.sin(theta),
+        average_lon + radiusLon/10 * Math.cos(theta)
       );
         mini_points.push(point_mini);
         points.push(
@@ -583,11 +588,8 @@ function get_bounds() {
         );
 
         distance = 0;
-        if (teams.length == 2) {
-          distance += map.distance(
-            teams[team_number_list[0]]["center"],
-            point
-          );
+        if (team_number_list.length > 1) {
+          distance += map.distance(teams[team_number_list[0]]["center"], point);
           distance += map.distance(teams[team_number_list[1]]["center"], point);
         }
 
@@ -599,28 +601,37 @@ function get_bounds() {
         theta += dTheta;
     }
 
-  
-    
-
-
   start = team_number_list[0];
-
-  for (t in teams) {
-    teams[t]["polygon"] = [];
-  }
-
+  t = 0;
+  tm = team_number_list[t];
   for (var a = 0; a < numberOfPoints; a++) {
-    i=a+team_split_point%30;
-    point = points[i];
-    mini_point = mini_points[i];
-    c_team = team_number_list[Math.floor((i / 30) * team_number_list.length)];
-    teams[c_team]["polygon"].push(point);
-    teams[c_team]["polygon"].unshift(mini_point);
+    console.log(tm);
+    b=(a-Math.round(team_split_point));
+    if (b%Math.floor(numberOfPoints/team_number_list.length)==0) {
+      t++;
+      tm = team_number_list[t%(team_number_list.length)];
+      teams[tm]["polygon"].push(points[(a-1) % numberOfPoints]);
+      teams[tm]["polygon"].unshift(mini_points[(a-1) % numberOfPoints]);
+    }
+
+    teams[tm]["polygon"].push(points[a%(numberOfPoints)]);
+    teams[tm]["polygon"].unshift(mini_points[a%(numberOfPoints)]);
+    // teams[tm]["polygon"].(mini_points[a]);
+
   }
+
+
 
   final_points = [];
+
+
   for (t in teams) {
-    final_points.push({team:t, polygon:teams[t]["polygon"]});
+
+    p = teams[t]["polygon"];
+
+    
+
+    final_points.push({team:t, polygon:p});
   }
 
   return {
