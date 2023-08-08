@@ -1,14 +1,13 @@
-
 var map;
 var coord;
 var video_on = false;
 var video = document.querySelector("video");
 var vetoed = false;
-var currentChallenge = 0
+var currentChallenge = 0;
 var marker = undefined;
 var screenLock = null;
 
-var myIcon = L.divIcon({ className: "my-div-icon"});
+var myIcon = L.divIcon({ className: "my-div-icon" });
 var url = "http://127.0.0.1:8100";
 var player_name = "ollie";
 var team = 1;
@@ -38,22 +37,18 @@ if (getCookie("team") != null) {
 
 setCookie("team", player_name, 365);
 
-
-
 var password = "";
 
 if (getCookie("password") != null) {
   password = getCookie("password");
-  
 }
 
-var url = "http://localhost:8100/";
 
-var people = {}
+var people = {};
 
 function send_server_data() {
   // send data to server
-  var data = {team: team, coord: coord};
+  var data = { team: team, coord: coord };
   xhr = new XMLHttpRequest();
   xhr.open("POST", url + "/set_data?player_id=" + id, true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -67,13 +62,15 @@ function send_server_data() {
   };
 
   // Converting JSON data to string
-  var data = JSON.stringify({ player_name: { coord: coord, team: team }, password: getPasswordFromCookie() });
+  var data = JSON.stringify({
+    player_name: { coord: coord, team: team },
+    password: getPasswordFromCookie(),
+  });
   data = data.replace("name", player_name);
   console.log(data);
 
   // Sending data with the request
   xhr.send(data);
-
 }
 
 function getPasswordFromCookie() {
@@ -95,7 +92,7 @@ function processXhrError(xhr) {
   if (xhr.readyState == 4 && xhr.status == 200) {
     setServerStatus("Connected", "green");
   } else if (xhr.readyState == 4 && xhr.status == 0) {
-    setServerStatus("Server not found", "red"); 
+    setServerStatus("Server not found", "red");
   } else if (xhr.status == 401) {
     setServerStatus("Wrong password", "red");
   } else if (xhr.status == 404) {
@@ -105,8 +102,7 @@ function processXhrError(xhr) {
   }
 }
 
-function get_server_data() {  
-
+function get_server_data() {
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "get_all", true);
   xhr.setRequestHeader("Content-Type", "application/json");
@@ -128,23 +124,24 @@ function get_server_data() {
   );
 
   console.log(json);
-  // add json to people 
+  // add json to people
   for (i in json) {
     if (typeof people[i] == "undefined") {
       people[i] = {};
     }
-    people[i]['coord'] = json[i]['coord'];
-    if (typeof people[i]['marker'] == "undefined") {
+    people[i]["coord"] = json[i]["coord"];
+    if (typeof people[i]["marker"] == "undefined") {
       let className = "div-icon";
-      className += " team-"+json[i]['team'];
-      if (json[i]['connected'] == false) {
+      className += " team-" + json[i]["team"];
+      if (json[i]["connected"] == false) {
         className += " disconnected";
       }
-      people[i]['marker'] = L.marker(people[i]['coord'], {icon:L.divIcon({ className: className})}).addTo(map);
-      people[i]['marker'].set
+      people[i]["marker"] = L.marker(people[i]["coord"], {
+        icon: L.divIcon({ className: className }),
+      }).addTo(map);
+      people[i]["marker"].set;
     }
   }
-
 }
 
 function setCookie(name, value, days) {
@@ -167,7 +164,6 @@ function getCookie(name) {
   return null;
 }
 
-
 async function getScreenLock() {
   if (isScreenLockSupported()) {
     try {
@@ -179,13 +175,12 @@ async function getScreenLock() {
 }
 
 function isScreenLockSupported() {
-  return (`wakeLock` in navigator);
+  return `wakeLock` in navigator;
 }
 
-function release() { 
-  if(typeof screenLock !== "undefined" && screenLock != null) {
-    screenLock.release()
-    .then(() => {
+function release() {
+  if (typeof screenLock !== "undefined" && screenLock != null) {
+    screenLock.release().then(() => {
       console.log("Lock released 🎈");
       screenLock = null;
     });
@@ -201,109 +196,105 @@ document.addEventListener("visibilitychange", async () => {
 var now = Date.now();
 
 onload = function () {
-    lock = document.getElementById("lock");
-    lock.style.display = "none";
+  lock = document.getElementById("lock");
+  lock.style.display = "none";
 
+  document.getElementById("name").value = player_name;
+  document.getElementById("password").value = password;
 
-    document.getElementById("name").value = player_name;
-    document.getElementById("password").value = password;
-
-    map = L.map("map").setView([51.505, -0.09], 1);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  map = L.map("map").setView([51.505, -0.09], 1);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "© OpenStreetMap",
+  }).addTo(map);
+  if (marker == undefined) {
+    marker = L.marker(get_coord(), {
+      icon: L.divIcon({ className: "player div-icon" + " team-" + team }),
     }).addTo(map);
-    if (marker == undefined) {
-      marker = L.marker(get_coord(), {icon: L.divIcon({ className: "player div-icon" + " team-"+team})}).addTo(map);
-      map.setView(get_coord(), 1.8);
-    }
-    marker.riseOnHover = true;
-    coord = get_coord();
-    function onMapClick(e) {
+    map.setView(get_coord(), 1.8);
+  }
+  marker.riseOnHover = true;
+  coord = get_coord();
+  function onMapClick(e) {
     // alert("You clicked the map at " + e.latlng);
-}
-map.on("click", onMapClick);
-var intervalId = window.setInterval(function () {
+  }
+  map.on("click", onMapClick);
+  var intervalId = window.setInterval(function () {
+    // send_server_data();
 
+    if (document.getElementById("lock").style.display != "none") {
+      return;
+    }
 
-        // send_server_data();
+    get_server_data();
 
-        if (document.getElementById("lock").style.display != 'none') {
-            return;
-        }
+    for (i in people) {
+      // if (typeof people[i].marker == "undefined") {
+      //   console.log("marker undefined", people[i]['coord']);
+      //   people[i]['marker'] = L.marker(people[i]['coord']).addTo(map);
+      // }
+      people[i]["marker"].setLatLng(people[i]["coord"]);
+      people[i]["marker"].bindTooltip(i).openTooltip();
+    }
 
-        get_server_data();
+    old_coord = coord;
+    coord = get_coord();
+    if (old_coord == undefined && coord != old_coord) {
+      map.setView(coord, 13);
+      marker.setLatLng(coord);
+      marker.bindTooltip("You").openTooltip();
+    }
 
+    speed =
+      (map.distance(
+        L.latLng(old_coord[0], old_coord[1]),
+        L.latLng(coord[0], coord[1])
+      ) /
+        (Date.now() - now)) *
+      3.6 *
+      0.001;
+    now = Date.now();
 
-        for (i in people) {
-          // if (typeof people[i].marker == "undefined") {
-          //   console.log("marker undefined", people[i]['coord']);
-          //   people[i]['marker'] = L.marker(people[i]['coord']).addTo(map);
-          // }
-          people[i]['marker'].setLatLng(people[i]['coord']);
-          people[i]['marker'].bindTooltip(i).openTooltip();
-
-        }
-
-
-
-
-        old_coord = coord;
-        coord = get_coord();
-        if ((old_coord == undefined) && coord!=old_coord) {
-            map.setView(coord, 13);
-            marker.setLatLng(coord);
-            marker.bindTooltip("You").openTooltip();
-          }
-          
-          speed = (map.distance(L.latLng(old_coord[0],old_coord[1]), L.latLng(coord[0],coord[1]))/(Date.now()-now))*3.6*0.001;
-          now = Date.now();
-
-
-        if (speed > 300) {
-            speed = 0;
-            if (coord != [51.505, -0.09]) {
-              map.setView(coord, 13);
-            }
-          }
-          speed = Math.round(speed * 10) / 10;
-          marker.setLatLng(coord);
-          marker.bindTooltip("You").openTooltip();
-          marker.setIcon(L.divIcon({ className: "player div-icon" + " team-"+team}));
-    
-    
-    }, 5000);
-    video = document.querySelector("video");
-    
+    if (speed > 300) {
+      speed = 0;
+      if (coord != [51.505, -0.09]) {
+        map.setView(coord, 13);
+      }
+    }
+    speed = Math.round(speed * 10) / 10;
+    marker.setLatLng(coord);
+    marker.bindTooltip("You").openTooltip();
+    marker.setIcon(
+      L.divIcon({ className: "player div-icon" + " team-" + team })
+    );
+  }, 5000);
+  video = document.querySelector("video");
 };
 var uLat = 51.505;
 var uLon = -0.09;
 
 function get_coord() {
-     
-        // get users lat/long
-        
-        var getPosition = {
-          enableHighAccuracy: false,
-          timeout: 9000,
-          maximumAge: 0
-        };
-        
-        function success(gotPosition) {
-            uLat = gotPosition.coords.latitude;
-            uLon = gotPosition.coords.longitude;
-        
-        };
-        
-        function error(err) {
-          console.warn(`ERROR(${err.code}): ${err.message}`);
-        };
+  // get users lat/long
 
-        navigator.geolocation.getCurrentPosition(success, error, getPosition);
+  var getPosition = {
+    enableHighAccuracy: false,
+    timeout: 9000,
+    maximumAge: 0,
+  };
 
-        return [uLat, uLon];
-    }
+  function success(gotPosition) {
+    uLat = gotPosition.coords.latitude;
+    uLon = gotPosition.coords.longitude;
+  }
 
+  function error(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+  }
+
+  navigator.geolocation.getCurrentPosition(success, error, getPosition);
+
+  return [uLat, uLon];
+}
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
@@ -350,26 +341,28 @@ function stopWebCam() {
   stream = null;
 }
 
-
 function show_people() {
   let min_lat = coord[0];
   let max_lat = coord[0];
   let min_lon = coord[1];
   let max_lon = coord[1];
   for (i in people) {
-    if (people[i]['coord'][0] < min_lat) {
-      min_lat = people[i]['coord'][0];
+    if (people[i]["coord"][0] < min_lat) {
+      min_lat = people[i]["coord"][0];
     }
-    if (people[i]['coord'][0] > max_lat) {
-      max_lat = people[i]['coord'][0];
+    if (people[i]["coord"][0] > max_lat) {
+      max_lat = people[i]["coord"][0];
     }
-    if (people[i]['coord'][1] < min_lon) {
-      min_lon = people[i]['coord'][1];
+    if (people[i]["coord"][1] < min_lon) {
+      min_lon = people[i]["coord"][1];
     }
-    if (people[i]['coord'][1] > max_lon) {
-      max_lon = people[i]['coord'][1];
+    if (people[i]["coord"][1] > max_lon) {
+      max_lon = people[i]["coord"][1];
     }
   }
 
-  map.fitBounds([[min_lat-0.03, min_lon-0.03], [max_lat+0.03, max_lon+0.03]]);
+  map.fitBounds([
+    [min_lat - 0.03, min_lon - 0.03],
+    [max_lat + 0.03, max_lon + 0.03],
+  ]);
 }

@@ -256,6 +256,10 @@ input {
 } */
 
 
+.has-flag {
+    
+}
+
 .disconnected {
     /* blink in and out */
     animation: blink 1s linear infinite;
@@ -373,3 +377,5 @@ input {
   width: auto;
   height: auto;
 }
+
+
