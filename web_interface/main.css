@@ -329,6 +329,20 @@ input {
     
 }
 
+.popup_player_selector {
+    display: none;
+    overflow-x: clip;
+    overflow-y: scroll;
+    height: 100%;
+    width: 100%;
+}
+
+#names {
+    display:flex;
+    border-radius: 1em;
+    padding: 10%;
+}
+
 
 #ping_circle:enabled {
     /* height: 50em;

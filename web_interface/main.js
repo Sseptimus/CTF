@@ -22,6 +22,39 @@ var started = false;
 
 var flag_pos = [0, 0];
 
+function tag_player(url, name) {
+  document.getElementById("popup_player_selector").style.display = "none";
+}
+
+function takePhoto() {
+  url = get_url();
+  video_on = false;
+  document.getElementById('photo').style.display = 'none';
+  document.getElementById("popup_player_selector").style.display = "flex";
+  stopWebCam();
+  document.getElementById("photo_display").src = url;
+  names = document.getElementById("names");
+  names.innerHTML = "";
+  for (i in people) {
+    console.log(i);
+    button = document.createElement("button");
+    button.className = "player_button team-" + people[i]["team"] + "";
+    button.innerText = i;
+    names.appendChild(button);
+    button.onclick = "tag_player("+url+", i)";
+  }
+
+}
+
+function get_sorted_by_distance() {
+  for (i in people) {
+    people[i]["distance"] = map.distance(coord, people[i]["coord"]);
+  }
+  return Object.keys(people).sort(function (a, b) {
+    return people[a]["distance"] - people[b]["distance"];
+  });
+}
+
 if (getCookie("flag_pos") != null) {
   flag_pos = getCookie("flag_pos").split(",");
   for (i in flag_pos) {
@@ -200,9 +233,6 @@ function get_server_data() {
       people[i]["flag_marker"].setOpacity(0.0);
     }
 
-
-
-    
   }
 }
 
@@ -503,7 +533,6 @@ function get_bounds() {
     teams[t]["center"] = [average_lat2, average_lon2];
   }
 
-  
 
   if (Object.keys(people).length == 0) {
     average_lat = coord[0];
@@ -706,14 +735,13 @@ function startWebCam() {
 }
 
 function get_url() {
-  var container = document.getElementById("url_container");
   var canvas = document.createElement("canvas");
   canvas.height = video.videoHeight;
   canvas.width = video.videoWidth;
   var ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   console.log(canvas.toDataURL());
-  container.textContent = canvas.toDataURL();
+  return canvas.toDataURL();
 }
 
 function stopWebCam() {
