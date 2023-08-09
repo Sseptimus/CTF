@@ -22,6 +22,39 @@ var started = false;
 
 var flag_pos = [0, 0];
 
+function tag_player(url, name) {
+  document.getElementById("popup_player_selector").style.display = "none";
+}
+
+function takePhoto() {
+  url = get_url();
+  video_on = false;
+  document.getElementById('photo').style.display = 'none';
+  document.getElementById("popup_player_selector").style.display = "flex";
+  stopWebCam();
+  document.getElementById("photo_display").src = url;
+  names = document.getElementById("names");
+  names.innerHTML = "";
+  for (i in people) {
+    console.log(i);
+    button = document.createElement("button");
+    button.className = "player_button team-" + people[i]["team"] + "";
+    button.innerText = i;
+    names.appendChild(button);
+    button.onclick = "tag_player("+url+", i)";
+  }
+
+}
+
+function get_sorted_by_distance() {
+  for (i in people) {
+    people[i]["distance"] = map.distance(coord, people[i]["coord"]);
+  }
+  return Object.keys(people).sort(function (a, b) {
+    return people[a]["distance"] - people[b]["distance"];
+  });
+}
+
 if (getCookie("flag_pos") != null) {
   flag_pos = getCookie("flag_pos").split(",");
   for (i in flag_pos) {
@@ -64,7 +97,11 @@ if (getCookie("team") != null) {
 setCookie("team", team, 365);
 
 
-var bounds = [[0,0],0];
+var bounds = {
+  outer: [[0,0], [0,0], [0,0], [0,0]],
+  inner: [[0,0], [0,0], [0,0], [0,0]],
+  teams: {}
+};
 
 var people = {
   
@@ -302,6 +339,7 @@ onload = function () {
     get_bounds();
   });
 
+  var team_polygons = {};
 
   polygon = L.polygon([[0,0],[0,0],[0,0]]).addTo(map);
 
@@ -313,6 +351,7 @@ onload = function () {
     }
 
     getServerData();
+
 
 
 
@@ -337,17 +376,33 @@ onload = function () {
       all_ready = false 
       for (i in people) {
         console.log(people[i]["ready"]);
-        if (!people[i]["ready"]) {
 
+        if (!people[i]["ready"]) {
           all_ready = false;
           break;
         }
         all_ready = true;
       }
+      if (all_ready) {
+        startGame();
+      }
     }
 
-    if (bounds.length > 3) {
-    polygon.setLatLngs(bounds);
+    // if (bounds.outer.length > 3) {
+    // polygon.setLatLngs(bounds.outer);
+    // }
+
+    for (i in bounds.teams) {
+      console.log(bounds.teams);
+      if (typeof team_polygons[i] == "undefined") {
+        color = ["red", "blue", "#30eb30", "#de3bde", "#57f2c1", "#ffed49"][
+          bounds.teams[i].team-1
+        ];
+
+        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color, opacity:0.5}).addTo(map);
+        
+      }
+      team_polygons[i].setLatLngs(bounds.teams[i].polygon);
     }
 
     
@@ -420,8 +475,6 @@ function startGame() {
   }
   ready = true;
   document.getElementById("ready").style.display = "none";
-  window.polygon.remove();
-  L.polyline(get_bounds(), { color: "red" }).addTo(map);
   
   for (i in people) {
     opacity = 1.0;
@@ -430,22 +483,63 @@ function startGame() {
     }
     people[i]["flag_marker"].setOpacity(opacity);
   }
-
-  map.removeLayer(flag);
-
-  
-  
 }
 
 var constraints = { audio: false, video: true };
 
+
+
+var center_location = [];
+
+function fixList(l) {
+  // return l;
+  for (let i = 1; i < l.length - 1; i++) {
+    if (l[i][0] - l[i + 1][0] != -1) {
+      l[i - 1][0] = l[i][0];
+      
+      return l.slice(i - 1).concat(l.slice(0, i + 1));
+    }
+  }
+
+  return l;
+}
+
 function get_bounds() {
   average_lat = coord[0];
   average_lon = coord[1];
+
+  teams = {};
+
   for (i in people) {
     average_lat += people[i]["coord"][0];
     average_lon += people[i]["coord"][1];
+    if (teams[people[i]["team"]]==undefined) {
+      teams[people[i]["team"]] = { coords: [people[i]["coord"]] };
+    }else {
+      teams[people[i]["team"]]["coords"].push(people[i]["coord"]);
+    }
+    console.log(people[i]);
   }
+
+  if (teams[team]==undefined) {
+    teams[team]={team: team, coords: [coord] };
+  }else {
+    teams[team]["coords"].push(coord);
+  }
+  
+
+  for (t in teams) {
+    average_lat2 = 0;
+    average_lon2 = 0;
+    for (c in teams[t]["coords"]) {
+      average_lat2 += teams[t]["coords"][c][0];
+      average_lon2 += teams[t]["coords"][c][1];
+    }
+    average_lat2 /= teams[t]["coords"].length;
+    average_lon2 /= teams[t]["coords"].length;
+    teams[t]["center"] = [average_lat2, average_lon2];
+  }
+
 
   if (Object.keys(people).length == 0) {
     average_lat = coord[0];
@@ -454,6 +548,10 @@ function get_bounds() {
   average_lat /= (Object.keys(people).length+1);
   average_lon /= (Object.keys(people).length+1);
   }
+
+  center_location = [average_lat, average_lon];
+
+
 
   var max_distance = 0;
 
@@ -473,7 +571,7 @@ function get_bounds() {
 
   if (map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) > max_distance) {
 
-    for (i=0; i<30; i++) {
+    for (i=0; i<80; i++) {
       if (
         map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) <
         max_distance
@@ -481,15 +579,15 @@ function get_bounds() {
         x = average_lat - flag_pos[0];
     y=average_lon-flag_pos[1];
 
-    flag_pos[0]+=x/5;
-    flag_pos[1]+=y/5;
+    flag_pos[0]+=x/7;
+    flag_pos[1]+=y/7;
 
 
     flag.setLatLng(flag_pos);
     }
   }
 
-  var numberOfPoints = 30;
+  var numberOfPoints = 60;
 
     var radiusLon = 1 / (111.319 * Math.cos(average_lat * (Math.PI / 180))) * (max_distance/1000);
     var radiusLat = (1 / 110.574) * (max_distance/1000);
@@ -497,22 +595,131 @@ function get_bounds() {
   var dTheta = (2 * Math.PI) / numberOfPoints;
 
 
+  var team_split_point = 0;
+  var teamThetaBest = 0;
+
+  
+  team_number_list = Object.keys(teams);
+team_number_list.sort();
+  
+  
+  for (t in teams) {
+    teams[t]["distance"] = map.distance(
+      L.latLng(average_lat, average_lon),
+      L.latLng(teams[t]["center"][0], teams[t]["center"][1])
+      );
+    teams[t]["polygon"] = [];
+    }
+  if (team_number_list.length == 1) {
+    teamTheta = 0;
+  }
+
   
   theta = 0;
 
   var points = [];
+  var mini_points = [];
+
     for (var i = 0; i < numberOfPoints; i++)
     {
-        points.push(
-          L.latLng(
+      point=L.latLng(
             average_lat + radiusLat * Math.sin(theta),
             average_lon + radiusLon * Math.cos(theta)
-          )
+          );
+      
+      point_mini = L.latLng(
+        average_lat + (radiusLat / 10) * Math.sin(theta),
+        average_lon + radiusLon/10 * Math.cos(theta)
+      );
+        mini_points.push(point_mini);
+        points.push(
+          point
         );
+
+        distance = 0;
+        if (team_number_list.length > 1) {
+          distance += map.distance(teams[team_number_list[0]]["center"], point);
+          distance += map.distance(teams[team_number_list[1]]["center"], point);
+        }
+
+        if (teamThetaBest < distance) {
+          teamThetaBest = distance;
+          team_split_point = i;
+        }
+        
         theta += dTheta;
     }
 
-  return points;
+  start = team_number_list[0];
+  t = 0;
+  tm = team_number_list[t];
+
+  team_points = {}
+  team_mini_points = {}
+
+  for (t in teams) {
+    team_points[t] = [];
+    team_mini_points[t] = [];
+  }
+  slice_length = Math.floor(numberOfPoints / team_number_list.length);
+  c=team_split_point;
+  for (var a = 0; a <= numberOfPoints; a++) {
+    console.log(tm);
+    c+=1;
+    b=(a+team_split_point);
+    if (c>slice_length) {
+      if (t >= team_number_list.length) {
+        t = 0;
+      }
+      team_points[tm].unshift([c + 1, points[a]]);
+      team_mini_points[tm].unshift([c+1, mini_points[a]]);
+      c=0;
+      t++;
+      if (t >= team_number_list.length) {
+        t = 0;
+      }
+      tm = team_number_list[t];
+    }
+
+
+    team_points[tm].push([c, points[a%(numberOfPoints)]]);
+    team_mini_points[tm].push([c, mini_points[a%(numberOfPoints)]]);
+  }
+
+  for (t in teams) {
+    let fixed_points = team_points[t];
+    fixed_points.sort((a, b) => a[0] - b[0]);
+    fixed_points = fixed_points.map((a) => a[1]);
+
+    let fixed_mini_points = team_mini_points[t];
+    fixed_mini_points.sort((a, b) => a[0] - b[0]);
+    fixed_mini_points = fixed_mini_points.map((a) => a[1]);
+
+    for (p in fixed_points) {
+      teams[t]["polygon"].push(fixed_points[p]);
+    }
+
+    for (p in fixed_mini_points) {
+      teams[t]["polygon"].unshift(fixed_mini_points[p]);
+    }
+  }
+
+  final_points = [];
+
+
+  for (t in teams) {
+
+    p = teams[t]["polygon"];
+
+  
+    final_points.push({team:t, polygon:p});
+  }
+
+  return {
+    inner: mini_points,
+    outer: points,
+    teams: final_points,
+  };
 
 }
 
@@ -535,14 +742,13 @@ function startWebCam() {
 }
 
 function get_url() {
-  var container = document.getElementById("url_container");
   var canvas = document.createElement("canvas");
   canvas.height = video.videoHeight;
   canvas.width = video.videoWidth;
   var ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   console.log(canvas.toDataURL());
-  container.textContent = canvas.toDataURL();
+  return canvas.toDataURL();
 }
 
 function stopWebCam() {
