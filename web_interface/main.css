@@ -335,6 +335,13 @@ input {
     overflow-y: scroll;
     height: 100%;
     width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup_player_selector button {
+    width: 80%
 }
 
 #names {
