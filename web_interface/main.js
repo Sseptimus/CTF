@@ -136,7 +136,7 @@ function get_server_data() {
 
 
   json = JSON.parse(
-    '{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]},"seb": {"coord": [-36.812466725, 174.8161114],"team": 1,"connected": true,"ready": true,"flag": [-36.83994626, 174.759457128]}}'
+    '{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]},"seb": {"coord": [-36.812466725, 174.9361114],"team": 1,"connected": true,"ready": true,"flag": [-36.83994626, 174.759457128]}}'
   );
 
   xhr = new XMLHttpRequest();
@@ -168,6 +168,8 @@ function get_server_data() {
     people[i]["coord"] = json[i]["coord"];
     people[i]["flag"] = json[i]["flag"];
     people[i]["team"] = json[i]["team"];
+    people[i]["ready"] = json[i]["ready"];
+    console.log("ready", people[i]["ready"]);
     if (typeof people[i]["marker"] == "undefined") {
       let className = "div-icon";
       className += " team-" + json[i]["team"];
@@ -337,12 +339,15 @@ onload = function () {
       all_ready = false 
       for (i in people) {
         console.log(people[i]["ready"]);
-        if (!people[i]["ready"]) {
 
+        if (!people[i]["ready"]) {
           all_ready = false;
           break;
         }
         all_ready = true;
+      }
+      if (all_ready) {
+        startGame();
       }
     }
 
@@ -357,7 +362,7 @@ onload = function () {
           bounds.teams[i].team-1
         ];
 
-        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color, }).addTo(map);
+        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color, opacity:0.5}).addTo(map);
         
       }
       team_polygons[i].setLatLngs(bounds.teams[i].polygon);
@@ -433,8 +438,6 @@ function startGame() {
   }
   ready = true;
   document.getElementById("ready").style.display = "none";
-  window.polygon.remove();
-  L.polyline(get_bounds().outer, { color: "red" }).addTo(map);
   
   for (i in people) {
     opacity = 1.0;
@@ -443,11 +446,6 @@ function startGame() {
     }
     people[i]["flag_marker"].setOpacity(opacity);
   }
-
-  map.removeLayer(flag);
-
-  
-  
 }
 
 var constraints = { audio: false, video: true };
@@ -537,7 +535,7 @@ function get_bounds() {
 
   if (map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) > max_distance) {
 
-    for (i=0; i<30; i++) {
+    for (i=0; i<80; i++) {
       if (
         map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) <
         max_distance
@@ -545,8 +543,8 @@ function get_bounds() {
         x = average_lat - flag_pos[0];
     y=average_lon-flag_pos[1];
 
-    flag_pos[0]+=x/5;
-    flag_pos[1]+=y/5;
+    flag_pos[0]+=x/7;
+    flag_pos[1]+=y/7;
 
 
     flag.setLatLng(flag_pos);

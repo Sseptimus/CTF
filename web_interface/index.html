@@ -128,17 +128,13 @@
     if (response) {
         ready = true;
         document.getElementById('ready').style.display = 'none';
-        document.getElementsByClassName('pre-game')[0].style.pointer_events = 'none';
-        classes = document.getElementsByClassName('pre-game');
-        console.log(classes);
-        for (let i = 0; i < classes.length; i++) {
-            console.log(classes[i]);
-            classes[i].style.opacity = 0.5;
-        }
+        flag.dragging.disable();
+        flag.setOpacity(0.5)
+
     }
     
     "
-    >Ready! Start Game
+    >Ready? Start Game
   </button>
     
     </div>
