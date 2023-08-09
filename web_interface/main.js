@@ -135,7 +135,9 @@ function get_server_data() {
   json = {};
 
 
-  json = JSON.parse('{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]}}');
+  json = JSON.parse(
+    '{"nick": {"coord": [-36.86246672580253, 174.8461114458974],"team": 3,"connected": true,"ready": true,"flag": [-36.87994626371284, 174.75945712237268]},"seb": {"coord": [-36.812466725, 174.8161114],"team": 1,"connected": true,"ready": true,"flag": [-36.83994626, 174.759457128]}}'
+  );
 
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "/get_all", true);
@@ -355,7 +357,8 @@ onload = function () {
           bounds.teams[i].team-1
         ];
 
-        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color}).addTo(map);
+        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color, }).addTo(map);
+        
       }
       team_polygons[i].setLatLngs(bounds.teams[i].polygon);
     }
@@ -453,6 +456,19 @@ var constraints = { audio: false, video: true };
 
 var center_location = [];
 
+function fixList(l) {
+  // return l;
+  for (let i = 1; i < l.length - 1; i++) {
+    if (l[i][0] - l[i + 1][0] != -1) {
+      l[i - 1][0] = l[i][0];
+      
+      return l.slice(i - 1).concat(l.slice(0, i + 1));
+    }
+  }
+
+  return l;
+}
+
 function get_bounds() {
   average_lat = coord[0];
   average_lon = coord[1];
@@ -475,7 +491,6 @@ function get_bounds() {
   }else {
     teams[team]["coords"].push(coord);
   }
-  console.log("teams ", teams);
   
 
   for (t in teams) {
@@ -604,23 +619,56 @@ team_number_list.sort();
   start = team_number_list[0];
   t = 0;
   tm = team_number_list[t];
-  for (var a = 0; a < numberOfPoints; a++) {
+
+  team_points = {}
+  team_mini_points = {}
+
+  for (t in teams) {
+    team_points[t] = [];
+    team_mini_points[t] = [];
+  }
+  slice_length = Math.floor(numberOfPoints / team_number_list.length);
+  c=team_split_point;
+  for (var a = 0; a <= numberOfPoints; a++) {
     console.log(tm);
-    b=(a-Math.round(team_split_point));
-    if (b%Math.floor(numberOfPoints/team_number_list.length)==0) {
+    c+=1;
+    b=(a+team_split_point);
+    if (c>slice_length) {
+      if (t >= team_number_list.length) {
+        t = 0;
+      }
+      team_points[tm].unshift([c + 1, points[a]]);
+      team_mini_points[tm].unshift([c+1, mini_points[a]]);
+      c=0;
       t++;
-      tm = team_number_list[t%(team_number_list.length)];
-      teams[tm]["polygon"].push(points[(a-1) % numberOfPoints]);
-      teams[tm]["polygon"].unshift(mini_points[(a-1) % numberOfPoints]);
+      if (t >= team_number_list.length) {
+        t = 0;
+      }
+      tm = team_number_list[t];
     }
 
-    teams[tm]["polygon"].push(points[a%(numberOfPoints)]);
-    teams[tm]["polygon"].unshift(mini_points[a%(numberOfPoints)]);
-    // teams[tm]["polygon"].(mini_points[a]);
 
+    team_points[tm].push([c, points[a%(numberOfPoints)]]);
+    team_mini_points[tm].push([c, mini_points[a%(numberOfPoints)]]);
   }
 
+  for (t in teams) {
+    let fixed_points = team_points[t];
+    fixed_points.sort((a, b) => a[0] - b[0]);
+    fixed_points = fixed_points.map((a) => a[1]);
 
+    let fixed_mini_points = team_mini_points[t];
+    fixed_mini_points.sort((a, b) => a[0] - b[0]);
+    fixed_mini_points = fixed_mini_points.map((a) => a[1]);
+
+    for (p in fixed_points) {
+      teams[t]["polygon"].push(fixed_points[p]);
+    }
+
+    for (p in fixed_mini_points) {
+      teams[t]["polygon"].unshift(fixed_mini_points[p]);
+    }
+  }
 
   final_points = [];
 
@@ -629,8 +677,7 @@ team_number_list.sort();
 
     p = teams[t]["polygon"];
 
-    
-
+  
     final_points.push({team:t, polygon:p});
   }
 
