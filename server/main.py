@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import random
 import json
 import threading
-import time
+import time, os
 
 PORT = 8100
 DOMAIN = "localhost"
@@ -99,7 +99,32 @@ def handle_reset_hard(handler):
     handler.send_header("Access-Control-Allow-Credentials", "true")
     handler.end_headers()
     handler.wfile.write(b"Reset complete - saved backup to " + backup_name.encode("utf-8"))
-
+    
+def handle_post_resource(handler):
+    if "ext" in handler.query_data:
+        extension = handler.query_data["ext"]
+    else:
+        extension = None
+        
+    data = handler.post_data
+    
+    filename = "resources/" + generate_random_string(20)
+    
+    if extension is not None:
+        filename += "." + extension
+        
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    
+    with open(filename, "wb") as f:
+        f.write(data)
+        
+    handler.send_response(200)
+    handler.send_header("Content-Type", "text/plain")
+    handler.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+    handler.send_header("Access-Control-Allow-Credentials", "true")
+    handler.end_headers()
+    handler.wfile.write(filename.encode("utf-8"))
+    
 def handle_json_get(handler):
     player_id = int(handler.query_data["player_id"])
 
@@ -128,6 +153,7 @@ def handle_get_all(handler):
 POST_ROUTES = {
     "/set_data": handle_json_set_post,
     "/reset_hard": handle_reset_hard,
+    "/post_resource": handle_post_resource,
 }
 
 GET_ROUTES = {
@@ -135,6 +161,43 @@ GET_ROUTES = {
     "/get_all": handle_get_all,
 }
 
+PUBLIC_DIRS = [
+    "/resources",
+]
+
+FILE_TYPES = {
+    "png": "image/png",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "gif": "image/gif",
+    "svg": "image/svg+xml",
+    "js": "application/javascript",
+    "css": "text/css",
+    "html": "text/html",
+    "txt": "text/plain",
+    "json": "application/json",
+    "ico": "image/x-icon",
+    "mp3": "audio/mpeg",
+    "wav": "audio/wav",
+    "ogg": "audio/ogg",
+    "mp4": "video/mp4",
+    "webm": "video/webm",
+    "pdf": "application/pdf",
+    "zip": "application/zip",
+    "gz": "application/gzip",
+    "tar": "application/x-tar",
+}
+
+def get_file_type(filename):
+    if "." not in filename:
+        return "application/octet-stream"
+    
+    ext = filename.split(".")[-1]
+    
+    if ext in FILE_TYPES:
+        return FILE_TYPES[ext]
+    
+    return "application/octet-stream"
 
 class WebRequestHandler(BaseHTTPRequestHandler):
     @cached_property
@@ -221,8 +284,52 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
         if self.url.path in GET_ROUTES:
             GET_ROUTES[self.url.path](self)
-        else:
+        elif ".." not in self.url.path:
+            print("looking for file")
+            print(self.url.path)
+            for public_dir in PUBLIC_DIRS:
+                if self.url.path.startswith(public_dir):
+                    print("File is in public dir", public_dir)
+                    self.do_file()
+                    return
+
+        print("File not found")
+        self.do_404()
+            
+    def do_file(self):
+        path = self.url.path
+        
+        if path.startswith("/"):
+            path = path[1:]
+            
+        print("Path:", path)
+            
+        #Check if file exists
+        if not os.path.exists(path):
+            print("File does not exist")
             self.do_404()
+            return
+        
+        #Check if file is a directory
+        if os.path.isdir(path):
+            print("File is a directory")
+            self.do_404()
+            return
+        
+        print("File exists")
+        
+        #Get file type
+        file_type = get_file_type(path)
+        
+        #Send file
+        self.send_response(200)
+        self.send_header("Content-Type", file_type)
+        self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+        self.send_header("Access-Control-Allow-Credentials", "true")
+        self.end_headers()
+        
+        with open(path, "rb") as f:
+            self.wfile.write(f.read())
 
     def do_404(self):
         self.send_response(404)
@@ -256,7 +363,7 @@ KILL = False
 
 def auto_backup():
     while not KILL:
-        time.sleep(20)
+        time.sleep(5)
         backup()
 
 
