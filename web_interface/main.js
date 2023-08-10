@@ -387,6 +387,14 @@ onload = function () {
 
     getServerData();
 
+    for (i in people) {
+      if (people[i].team != team) {
+        if (map.distance(marker.getLatLng(), people[i].flag_pos) < 100) {
+          has_flag = people[i].team;
+        }
+      }
+    }
+
     old_coord = coord;
     coord = get_coord();
     if (old_coord == undefined && coord != old_coord) {
@@ -472,6 +480,13 @@ onload = function () {
 };
 var uLat = 51.505;
 var uLon = -0.09;
+
+// 0 == netural/center
+function what_team_is_player_in() {
+  if (map.distance(marker.getLatLng(), center_location) < 300) {
+
+  }
+}
 
 function get_coord() {
   // get users lat/long
