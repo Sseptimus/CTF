@@ -224,7 +224,15 @@ function getServerData() {
   xhr.onreadystatechange = function () {
     processXhrError(xhr);
     if (xhr.readyState == 4 && xhr.status == 200) {
+      try {
       json = JSON.parse(xhr.responseText);
+      } catch (e) {
+        console.log("Error parsing json",e);
+        split = (xhr.responseText).split("}}");
+        json = JSON.parse(split[0]+"}}");
+        console.log(split[1]);
+        return;
+      }
       
 
       // add json to people
