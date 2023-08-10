@@ -6,6 +6,8 @@ var vetoed = false;
 var currentChallenge = 0;
 var marker = undefined;
 var screenLock = null;
+
+// becomes marker
 var flag = undefined;
 
 var myIcon = L.divIcon({ className: "my-div-icon" });
@@ -14,10 +16,73 @@ var player_name = "ollie";
 var team = 1;
 var polygon = undefined;
 
+// is player ready to start game
 var ready = false;
+
+// are all players ready to start game
 var started = false;
 
+// use id of team to id flag
+var carrying_flag = null;
+var tagged = false;
+
 var flag_pos = [0, 0];
+
+
+var password = "";
+var myId = Math.floor(Math.random() * 1000000000);
+
+
+if (getCookie("password") != null) {
+  password = getCookie("password");
+}
+
+if (getCookie("flag_pos") != null) {
+  flag_pos = getCookie("flag_pos").split(",");
+  for (i in flag_pos) {
+    flag_pos[i] = parseFloat(flag_pos[i]);
+  }
+}
+
+if (getCookie("id") != null) {
+  myId = getCookie("id");
+}
+
+if (getCookie("url") != null) {
+  url = getCookie("url");
+}
+
+if (getCookie("name") != null) {
+  player_name = getCookie("name");
+}
+
+if (getCookie("team") != null) {
+  team = getCookie("team");
+}
+
+setCookie("flag_pos", flag_pos, 365);
+setCookie("url", url, 365);
+setCookie("id", myId, 365);
+setCookie("name", player_name, 365);
+setCookie("team", team, 365);
+
+var bounds = {
+  outer: [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ],
+  inner: [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ],
+  teams: {},
+};
+
+var people = {};
 
 function tag_player(url, name) {
   document.getElementById("popup_player_selector").style.display = "none";
@@ -42,6 +107,7 @@ function takePhoto() {
   }
 }
 
+// returns list of other players sorted by distance from current position
 function get_sorted_by_distance() {
   for (i in people) {
     people[i]["distance"] = map.distance(coord, people[i]["coord"]);
@@ -50,65 +116,6 @@ function get_sorted_by_distance() {
     return people[a]["distance"] - people[b]["distance"];
   });
 }
-
-if (getCookie("flag_pos") != null) {
-  flag_pos = getCookie("flag_pos").split(",");
-  for (i in flag_pos) {
-    flag_pos[i] = parseFloat(flag_pos[i]);
-  }
-}
-
-setCookie("flag_pos", flag_pos, 365);
-
-var password = "";
-
-if (getCookie("password") != null) {
-  password = getCookie("password");
-}
-
-// random number
-var myId = Math.floor(Math.random() * 1000000000);
-if (getCookie("id") != null) {
-  myId = getCookie("id");
-}
-
-if (getCookie("url") != null) {
-  url = getCookie("url");
-}
-
-setCookie("url", url, 365);
-
-setCookie("id", myId, 365);
-
-if (getCookie("name") != null) {
-  player_name = getCookie("name");
-}
-
-setCookie("name", player_name, 365);
-
-if (getCookie("team") != null) {
-  team = getCookie("team");
-}
-
-setCookie("team", team, 365);
-
-var bounds = {
-  outer: [
-    [0, 0],
-    [0, 0],
-    [0, 0],
-    [0, 0],
-  ],
-  inner: [
-    [0, 0],
-    [0, 0],
-    [0, 0],
-    [0, 0],
-  ],
-  teams: {},
-};
-
-var people = {};
 
 function send_server_data() {
   // send data to server
@@ -128,7 +135,9 @@ function send_server_data() {
     ready: ready,
     name: player_name,
     connected: true,
-
+    tagged: false,
+    carrying_flag: carrying_flag,
+    tagged: tagged, 
     password: getPasswordFromCookie(),
   });
 
@@ -143,13 +152,14 @@ function getPasswordFromCookie() {
   return password;
 }
 
+// sets text and color of popup in bottom right
 function setServerStatus(status, color) {
   const element = document.getElementById("server_status");
-
   element.innerText = status;
   element.style.color = color;
 }
 
+// updates server text based on server status
 function processXhrError(xhr) {
   if (xhr.readyState == 4 && xhr.status == 200) {
     setServerStatus("Connected", "green");
@@ -171,6 +181,14 @@ function makePlayerIcons(player) {
 
     if (player["connected"] == false) {
       className += " disconnected";
+    }
+
+    if (player["carrying_flag"] != null) {
+      className += " carrying-flag-"+player["carrying_flag"]+"";
+    }
+
+    if (player["tagged"] == true) {
+      className += " tagged";
     }
 
     player["marker"] = L.marker(player["coord"], {
@@ -204,9 +222,10 @@ function makePlayerIcons(player) {
 }
 
 function validatePlayerJson(json) {
-  REQUIRES_KEYS = ["coord", "flag_pos", "name", "team", "ready", "connected"];
+  REQUIRES_KEYS = ["coord", "flag_pos", "name", "team", "ready", "connected", "tagged", "carrying_flag"];
 
   for (key in REQUIRES_KEYS) {
+    // perhaps add default values for each probity?
     if (typeof json[REQUIRES_KEYS[key]] == "undefined") {
       return false;
     }
@@ -215,6 +234,7 @@ function validatePlayerJson(json) {
   return true;
 }
 
+// gets data from server and applies it, not returns it
 function getServerData() {
   xhr = new XMLHttpRequest();
   xhr.open("GET", url + "/get_all", true);
@@ -282,6 +302,7 @@ function getCookie(name) {
   return null;
 }
 
+// prevents screen from turning off
 async function getScreenLock() {
   if (isScreenLockSupported()) {
     try {

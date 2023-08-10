@@ -410,4 +410,49 @@ input {
   height: auto;
 }
 
+.tagged {
+    opacity: 0.5;
+}
+
+.carrying_flag-1 {
+    border-style: dashed;
+    border-color: #f64545;
+    border-width: 2px;
+}
+
+.carrying_flag-2 {
+    border-style: dashed;
+    border-color: #8585ef;
+    border-width: 2px;
+}
+
+.carrying_flag-3 {
+    border-style: dashed;
+    border-color: #30eb30;
+    border-width: 2px;
+}
+
+.carrying_flag-4 {
+    border-style: dashed;
+    border-color: #de3bde;
+    border-width: 2px;
+}
+
+.carrying_flag-5 {
+    border-style: dashed;
+    border-color: #57f2c1;
+    border-width: 2px;
+}
+
+.carrying_flag-6 {
+    border-style: dashed;
+    border-color: #ffed49;
+    border-width: 2px;
+}
+
+.carrying_flag-7 {
+    border-style: dashed;
+    border-color: #a1a1e1;
+    border-width: 2px;
+}
 
