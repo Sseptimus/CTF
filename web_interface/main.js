@@ -1,4 +1,3 @@
-
 var map;
 var coord;
 var video_on = false;
@@ -18,8 +17,6 @@ var polygon = undefined;
 var ready = false;
 var started = false;
 
-
-
 var flag_pos = [0, 0];
 
 function tag_player(url, name) {
@@ -29,7 +26,7 @@ function tag_player(url, name) {
 function takePhoto() {
   url = get_url();
   video_on = false;
-  document.getElementById('photo').style.display = 'none';
+  document.getElementById("photo").style.display = "none";
   document.getElementById("popup_player_selector").style.display = "flex";
   stopWebCam();
   document.getElementById("photo_display").src = url;
@@ -41,9 +38,8 @@ function takePhoto() {
     button.className = "player_button team-" + people[i]["team"] + "";
     button.innerText = i;
     names.appendChild(button);
-    button.onclick = "tag_player("+url+", i)";
+    button.onclick = "tag_player(" + url + ", i)";
   }
-
 }
 
 function get_sorted_by_distance() {
@@ -96,16 +92,23 @@ if (getCookie("team") != null) {
 
 setCookie("team", team, 365);
 
-
 var bounds = {
-  outer: [[0,0], [0,0], [0,0], [0,0]],
-  inner: [[0,0], [0,0], [0,0], [0,0]],
-  teams: {}
+  outer: [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ],
+  inner: [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ],
+  teams: {},
 };
 
-var people = {
-  
-};
+var people = {};
 
 function send_server_data() {
   // send data to server
@@ -119,9 +122,9 @@ function send_server_data() {
 
   // Converting JSON data to string
   var data = JSON.stringify({
-    coord: coord, 
-    team: team, 
-    flag_pos, 
+    coord: coord,
+    team: team,
+    flag_pos,
     ready: ready,
     name: player_name,
     connected: true,
@@ -185,7 +188,9 @@ function makePlayerIcons(player) {
 
   if (typeof player["flag_marker"] == "undefined") {
     player["flag_marker"] = L.marker(player["flag_pos"], {
-      icon: L.divIcon({ className: "enemy-flag flag-icon team-" + player["team"] }),
+      icon: L.divIcon({
+        className: "enemy-flag flag-icon team-" + player["team"],
+      }),
     }).addTo(map);
     player["flag_marker"].bindTooltip(player["name"] + "'s flag").openTooltip();
     player["flag_marker"].setOpacity(0.0);
@@ -220,6 +225,7 @@ function getServerData() {
     processXhrError(xhr);
     if (xhr.readyState == 4 && xhr.status == 200) {
       json = JSON.parse(xhr.responseText);
+      
 
       // add json to people
       for (playerId in json) {
@@ -303,7 +309,6 @@ onload = function () {
   lock = document.getElementById("lock");
   lock.style.display = "none";
 
-
   document.getElementById("name").value = player_name;
   document.getElementById("password").value = password;
 
@@ -321,8 +326,6 @@ onload = function () {
   marker.riseOnHover = true;
   coord = get_coord();
 
-
-
   flag = L.marker([51.505, -0.09], {
     icon: L.divIcon({
       className: "flag-icon",
@@ -332,7 +335,6 @@ onload = function () {
   }).addTo(map);
   flag.dragging.enable();
 
-
   flag.on("dragend", function (e) {
     flag_pos = flag.getLatLng();
     flag_pos = [flag_pos.lat, flag_pos.lng];
@@ -341,7 +343,11 @@ onload = function () {
 
   var team_polygons = {};
 
-  polygon = L.polygon([[0,0],[0,0],[0,0]]).addTo(map);
+  polygon = L.polygon([
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ]).addTo(map);
 
   var intervalId = window.setInterval(function () {
     send_server_data();
@@ -351,9 +357,6 @@ onload = function () {
     }
 
     getServerData();
-
-
-
 
     old_coord = coord;
     coord = get_coord();
@@ -366,14 +369,14 @@ onload = function () {
     if (!ready) {
       flag.bindTooltip("Your Flag").openTooltip();
       try {
-      bounds = get_bounds();
+        bounds = get_bounds();
       } catch (e) {
         console.log(e);
       }
     }
 
     if (ready) {
-      all_ready = false 
+      all_ready = false;
       for (i in people) {
         console.log(people[i]["ready"]);
 
@@ -394,18 +397,24 @@ onload = function () {
 
     for (i in bounds.teams) {
       console.log(bounds.teams);
+      
+      color = ["red", "blue", "#30eb30", "#de3bde", "#57f2c1", "#ffed49"][
+        bounds.teams[i].team - 1
+      ];
       if (typeof team_polygons[i] == "undefined") {
-        color = ["red", "blue", "#30eb30", "#de3bde", "#57f2c1", "#ffed49"][
-          bounds.teams[i].team-1
-        ];
 
-        team_polygons[i] = L.polygon([[0,0],[0,0],[0,0]], {color: color, opacity:0.5}).addTo(map);
-        
+        team_polygons[i] = L.polygon(
+          [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+          ],
+          { color: color, opacity: 0.5 }
+        ).addTo(map);
       }
+      team_polygons[i].setStyle({ color: color });
       team_polygons[i].setLatLngs(bounds.teams[i].polygon);
     }
-
-    
 
     speed =
       (map.distance(
@@ -475,7 +484,7 @@ function startGame() {
   }
   ready = true;
   document.getElementById("ready").style.display = "none";
-  
+
   for (i in people) {
     opacity = 1.0;
     if (people[i]["team"] == team) {
@@ -487,8 +496,6 @@ function startGame() {
 
 var constraints = { audio: false, video: true };
 
-
-
 var center_location = [];
 
 function fixList(l) {
@@ -496,7 +503,7 @@ function fixList(l) {
   for (let i = 1; i < l.length - 1; i++) {
     if (l[i][0] - l[i + 1][0] != -1) {
       l[i - 1][0] = l[i][0];
-      
+
       return l.slice(i - 1).concat(l.slice(0, i + 1));
     }
   }
@@ -513,20 +520,19 @@ function get_bounds() {
   for (i in people) {
     average_lat += people[i]["coord"][0];
     average_lon += people[i]["coord"][1];
-    if (teams[people[i]["team"]]==undefined) {
+    if (teams[people[i]["team"]] == undefined) {
       teams[people[i]["team"]] = { coords: [people[i]["coord"]] };
-    }else {
+    } else {
       teams[people[i]["team"]]["coords"].push(people[i]["coord"]);
     }
     console.log(people[i]);
   }
 
-  if (teams[team]==undefined) {
-    teams[team]={team: team, coords: [coord] };
-  }else {
+  if (teams[team] == undefined) {
+    teams[team] = { team: team, coords: [coord] };
+  } else {
     teams[team]["coords"].push(coord);
   }
-  
 
   for (t in teams) {
     average_lat2 = 0;
@@ -540,18 +546,15 @@ function get_bounds() {
     teams[t]["center"] = [average_lat2, average_lon2];
   }
 
-
   if (Object.keys(people).length == 0) {
     average_lat = coord[0];
     average_lon = coord[1];
-  }else {
-  average_lat /= (Object.keys(people).length+1);
-  average_lon /= (Object.keys(people).length+1);
+  } else {
+    average_lat /= Object.keys(people).length + 1;
+    average_lon /= Object.keys(people).length + 1;
   }
 
   center_location = [average_lat, average_lon];
-
-
 
   var max_distance = 0;
 
@@ -569,111 +572,109 @@ function get_bounds() {
 
   max_distance = Math.max(max_distance, 5000);
 
-  if (map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) > max_distance) {
-
-    for (i=0; i<80; i++) {
+  if (
+    map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) >
+    max_distance
+  ) {
+    for (i = 0; i < 80; i++) {
       if (
         map.distance(L.latLng(average_lat, average_lon), L.latLng(flag_pos)) <
         max_distance
-      ) {break}
-        x = average_lat - flag_pos[0];
-    y=average_lon-flag_pos[1];
+      ) {
+        break;
+      }
+      x = average_lat - flag_pos[0];
+      y = average_lon - flag_pos[1];
 
-    flag_pos[0]+=x/7;
-    flag_pos[1]+=y/7;
+      flag_pos[0] += x / 7;
+      flag_pos[1] += y / 7;
 
-
-    flag.setLatLng(flag_pos);
+      flag.setLatLng(flag_pos);
     }
   }
 
   var numberOfPoints = 60;
 
-    var radiusLon = 1 / (111.319 * Math.cos(average_lat * (Math.PI / 180))) * (max_distance/1000);
-    var radiusLat = (1 / 110.574) * (max_distance/1000);
+  var radiusLon =
+    (1 / (111.319 * Math.cos(average_lat * (Math.PI / 180)))) *
+    (max_distance / 1000);
+  var radiusLat = (1 / 110.574) * (max_distance / 1000);
 
   var dTheta = (2 * Math.PI) / numberOfPoints;
-
 
   var team_split_point = 0;
   var teamThetaBest = 0;
 
-  
   team_number_list = Object.keys(teams);
-team_number_list.sort();
-  
-  
+  team_number_list.sort();
+
   for (t in teams) {
     teams[t]["distance"] = map.distance(
       L.latLng(average_lat, average_lon),
       L.latLng(teams[t]["center"][0], teams[t]["center"][1])
-      );
+    );
     teams[t]["polygon"] = [];
-    }
+  }
   if (team_number_list.length == 1) {
     teamTheta = 0;
   }
 
-  
   theta = 0;
 
   var points = [];
   var mini_points = [];
 
-    for (var i = 0; i < numberOfPoints; i++)
-    {
-      point=L.latLng(
-            average_lat + radiusLat * Math.sin(theta),
-            average_lon + radiusLon * Math.cos(theta)
-          );
-      
-      point_mini = L.latLng(
-        average_lat + (radiusLat / 10) * Math.sin(theta),
-        average_lon + radiusLon/10 * Math.cos(theta)
-      );
-        mini_points.push(point_mini);
-        points.push(
-          point
-        );
+  for (var i = 0; i < numberOfPoints; i++) {
+    point = L.latLng(
+      average_lat + radiusLat * Math.sin(theta),
+      average_lon + radiusLon * Math.cos(theta)
+    );
 
-        distance = 0;
-        if (team_number_list.length > 1) {
-          distance += map.distance(teams[team_number_list[0]]["center"], point);
-          distance += map.distance(teams[team_number_list[1]]["center"], point);
-        }
+    point_mini = L.latLng(
+      average_lat + (radiusLat / 10) * Math.sin(theta),
+      average_lon + (radiusLon / 10) * Math.cos(theta)
+    );
+    mini_points.push(point_mini);
+    points.push(point);
 
-        if (teamThetaBest < distance) {
-          teamThetaBest = distance;
-          team_split_point = i;
-        }
-        
-        theta += dTheta;
+    distance = 0;
+    if (team_number_list.length > 1) {
+      distance += map.distance(teams[team_number_list[0]]["center"], point);
+      distance += map.distance(teams[team_number_list[1]]["center"], point);
     }
+
+    if (teamThetaBest < distance) {
+      teamThetaBest = distance;
+      team_split_point = i;
+    }
+
+    theta += dTheta;
+  }
 
   start = team_number_list[0];
   t = 0;
   tm = team_number_list[t];
 
-  team_points = {}
-  team_mini_points = {}
+  team_points = {};
+  team_mini_points = {};
 
   for (t in teams) {
     team_points[t] = [];
     team_mini_points[t] = [];
   }
   slice_length = Math.floor(numberOfPoints / team_number_list.length);
-  c=team_split_point;
+  c = team_split_point;
   for (var a = 0; a <= numberOfPoints; a++) {
     console.log(tm);
-    c+=1;
-    b=(a+team_split_point);
-    if (c>slice_length) {
+    c += 1;
+    b = a + team_split_point;
+    if (c > slice_length) {
       if (t >= team_number_list.length) {
         t = 0;
       }
       team_points[tm].unshift([c + 1, points[a]]);
-      team_mini_points[tm].unshift([c+1, mini_points[a]]);
-      c=0;
+      team_mini_points[tm].unshift([c + 1, mini_points[a]]);
+      c = 0;
       t++;
       if (t >= team_number_list.length) {
         t = 0;
@@ -681,9 +682,8 @@ team_number_list.sort();
       tm = team_number_list[t];
     }
 
-
-    team_points[tm].push([c, points[a%(numberOfPoints)]]);
-    team_mini_points[tm].push([c, mini_points[a%(numberOfPoints)]]);
+    team_points[tm].push([c, points[a % numberOfPoints]]);
+    team_mini_points[tm].push([c, mini_points[a % numberOfPoints]]);
   }
 
   for (t in teams) {
@@ -706,21 +706,17 @@ team_number_list.sort();
 
   final_points = [];
 
-
   for (t in teams) {
-
     p = teams[t]["polygon"];
-
-  
-    final_points.push({team:t, polygon:p});
+    p = p.filter((a) => a != undefined);
+    final_points.push({ team: t, polygon: p });
   }
-
+  console.log(final_points);
   return {
     inner: mini_points,
     outer: points,
     teams: final_points,
   };
-
 }
 
 function successCallback(stream) {
@@ -785,5 +781,4 @@ function show_people() {
     [min_lat - 0.03, min_lon - 0.03],
     [max_lat + 0.03, max_lon + 0.03],
   ]);
-  
 }
