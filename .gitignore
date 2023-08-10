@@ -2,3 +2,4 @@
 sh.exe.stackdump
 *.stackdump
 **/backup.json
+server/resources/

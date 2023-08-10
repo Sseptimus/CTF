@@ -284,6 +284,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
         if self.url.path in GET_ROUTES:
             GET_ROUTES[self.url.path](self)
+            return
         elif ".." not in self.url.path:
             print("looking for file")
             print(self.url.path)
