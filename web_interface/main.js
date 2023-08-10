@@ -554,7 +554,7 @@ function fixList(l) {
 
   return l;
 }
-
+// gets the play area
 function get_bounds() {
   average_lat = coord[0];
   average_lon = coord[1];
