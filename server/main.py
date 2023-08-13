@@ -7,10 +7,18 @@ import random
 import json
 import threading
 import time, os
+import traceback
 
 PORT = 8100
 DOMAIN = "localhost"
 CORS_ALLOW_ORIGIN = "*"
+MESSAGES = {}
+
+@dataclass
+class Message:
+    from_id: int
+    time_received: float
+    content: object
 
 def generate_random_string(length):
     chars = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -125,6 +133,50 @@ def handle_post_resource(handler):
     handler.end_headers()
     handler.wfile.write(filename.encode("utf-8"))
     
+def handle_send_message(handler):
+    sender_id = int(handler.query_data["sender_id"])
+    target_ids = [int(x) for x in handler.query_data["target_ids"].split(",")]
+    
+    data = handler.json_data
+    
+    for target_id in target_ids:
+        if target_id not in MESSAGES:
+            MESSAGES[target_id] = []
+            
+        MESSAGES[target_id].append(Message(sender_id, time.time(), data))
+        
+    handler.do_Ok()
+        
+def clear_expired_messages():
+    for player_id in MESSAGES:
+        messages = MESSAGES[player_id]
+        
+        for i in range(len(messages) - 1, -1, -1):
+            if time.time() - messages[i].time_received > 60:
+                del messages[i]
+                
+def handle_get_messages(handler):
+    player_id = int(handler.query_data["player_id"])
+    clear_expired_messages()
+    
+    if player_id not in MESSAGES:
+        MESSAGES[player_id] = []
+    
+    obj = []
+    
+    for message in MESSAGES[player_id]:
+        obj.append({
+            "from_id": message.from_id,
+            "content": message.content
+        })
+    
+    handler.send_response(200)
+    handler.send_header("Content-Type", "application/json")
+    handler.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+    handler.send_header("Access-Control-Allow-Credentials", "true")
+    handler.end_headers()
+    handler.wfile.write(json.dumps(obj).encode("utf-8"))
+     
 def handle_json_get(handler):
     player_id = int(handler.query_data["player_id"])
 
@@ -270,32 +322,52 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         return valid
 
     def do_POST(self):
-        if not self.verify_password():
-            return
+        try:
+            if not self.verify_password():
+                return
 
-        if self.url.path in POST_ROUTES:
-            POST_ROUTES[self.url.path](self)
-        else:
-            self.do_404()
+            if self.url.path in POST_ROUTES:
+                POST_ROUTES[self.url.path](self)
+            else:
+                self.do_404()
+        except Exception as e:
+            print("Error in POST request:", e)
+            traceback.print_exc()
+            self.send_response(500)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.end_headers()
+            self.wfile.write(b"Internal Server Error")
 
     def do_GET(self):
-        if not self.verify_password():
-            return
+        try:
+            if not self.verify_password():
+                return
 
-        if self.url.path in GET_ROUTES:
-            GET_ROUTES[self.url.path](self)
-            return
-        elif ".." not in self.url.path:
-            print("looking for file")
-            print(self.url.path)
-            for public_dir in PUBLIC_DIRS:
-                if self.url.path.startswith(public_dir):
-                    print("File is in public dir", public_dir)
-                    self.do_file()
-                    return
+            if self.url.path in GET_ROUTES:
+                GET_ROUTES[self.url.path](self)
+                return
+            elif ".." not in self.url.path:
+                print("looking for file")
+                print(self.url.path)
+                for public_dir in PUBLIC_DIRS:
+                    if self.url.path.startswith(public_dir):
+                        print("File is in public dir", public_dir)
+                        self.do_file()
+                        return
 
-        print("File not found")
-        self.do_404()
+            print("File not found")
+            self.do_404()
+        except Exception as e:
+            print("Error in GET request:", e)
+            traceback.print_exc()
+            self.send_response(500)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.end_headers()
+            self.wfile.write(b"Internal Server Error")
             
     def do_file(self):
         path = self.url.path
