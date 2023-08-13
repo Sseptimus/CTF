@@ -169,6 +169,8 @@ def handle_get_messages(handler):
             "from_id": message.from_id,
             "content": message.content
         })
+        
+    MESSAGES[player_id] = []
     
     handler.send_response(200)
     handler.send_header("Content-Type", "application/json")
@@ -206,11 +208,13 @@ POST_ROUTES = {
     "/set_data": handle_json_set_post,
     "/reset_hard": handle_reset_hard,
     "/post_resource": handle_post_resource,
+    "/send_message": handle_send_message,
 }
 
 GET_ROUTES = {
     "/get_data": handle_json_get,
     "/get_all": handle_get_all,
+    "/get_messages": handle_get_messages,
 }
 
 PUBLIC_DIRS = [
