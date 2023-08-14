@@ -28,8 +28,8 @@ var ready = false;
 // are all players ready to start game
 var started = false;
 
-// use id of team to id flag
-var carrying_flag = null;
+// use id of person with flag to id flag
+var carrying_flag_user_id = null;
 var tagged = false;
 
 var flag_pos = [0, 0];
@@ -37,38 +37,86 @@ var flag_pos = [0, 0];
 var password = "";
 var myId = Math.floor(Math.random() * 1000000000);
 
-if (getCookie("password") != null) {
-  password = getCookie("password");
-}
+function coord_to_string(coord2) {
 
-if (getCookie("flag_pos") != null) {
-  flag_pos = getCookie("flag_pos").split(",");
-  for (i in flag_pos) {
-    flag_pos[i] = parseFloat(flag_pos[i]);
+  if (coord2[0]==undefined) {
+    coord2 = [coord2.lng, coord2.lat];
   }
+  return coord2[0] + "," + coord2[1];
+}
+function string_to_coord(coord) {
+  ret = coord.split(",").map(parseFloat);
+  console.log(ret);
+  if (isNaN(ret[0]) || isNaN(ret[1])) {
+    console.log("NaN in ret");
+    return [0, 0];
+  }
+  return ret
 }
 
-if (getCookie("id") != null) {
-  myId = getCookie("id");
+function get_cookies() {
+  if (getCookie("password") != null) {
+    password = getCookie("password");
+  }
+
+  if (getCookie("flag_pos") != null) {
+    flag_pos = getCookie("flag_pos").split(",");
+    for (i in flag_pos) {
+      flag_pos[i] = parseFloat(flag_pos[i]);
+    }
+  }
+
+  if (getCookie("id") != null) {
+    myId = getCookie("id");
+  }
+
+  if (getCookie("url") != null) {
+    url = getCookie("url");
+  }
+
+  if (getCookie("name") != null) {
+    player_name = getCookie("name");
+  }
+
+  if (getCookie("team") != null) {
+    team = getCookie("team");
+  }
+
+  if (getCookie("coord") != null) {
+    coord = string_to_coord( getCookie("coord"));
+  }
+  if (getCookie("flag_pos") != null) {
+
+    flag_pos = L.latLng( string_to_coord( getCookie("flag_pos")));
+  }
+  if (getCookie("started") != null) {
+    started = getCookie("started");
+  }
+  if (getCookie("ready") != null) {
+    ready = getCookie("ready");
+  }
+
 }
 
-if (getCookie("url") != null) {
-  url = getCookie("url");
+
+function save_cookies() {
+  setCookie("flag_pos", flag_pos, 365);
+  setCookie("url", url, 365);
+  setCookie("id", myId, 365);
+  setCookie("name", player_name, 365);
+  setCookie("team", team, 365);
+  setCookie("coord", coord_to_string(coord), 365);
+  setCookie("started", started, 365);
+  setCookie("ready", ready, 365);
+  setCookie("password", password, 365);
+  setCookie("flag_pos", coord_to_string(flag_pos), 365);
 }
 
-if (getCookie("name") != null) {
-  player_name = getCookie("name");
-}
+get_cookies();
+save_cookies();
 
-if (getCookie("team") != null) {
-  team = getCookie("team");
-}
 
-setCookie("flag_pos", flag_pos, 365);
-setCookie("url", url, 365);
-setCookie("id", myId, 365);
-setCookie("name", player_name, 365);
-setCookie("team", team, 365);
+
 
 var bounds = {
   outer: [
@@ -139,7 +187,7 @@ function send_server_data() {
     name: player_name,
     connected: true,
     tagged: false,
-    carrying_flag: carrying_flag,
+    carrying_flag: carrying_flag_user_id,
     tagged: tagged,
     password: getPasswordFromCookie(),
   });
@@ -187,7 +235,8 @@ function makePlayerIcons(player) {
     }
 
     if (player["carrying_flag"] != null) {
-      className += " carrying-flag-" + player["carrying_flag"] + "";
+      className += " carrying-flag-" + players[player["carrying_flag"]]["team"] + "";
+
     }
 
     if (player["tagged"] == true) {
@@ -399,12 +448,30 @@ onload = function () {
 
     getServerData();
 
+    carried_flags = {};
+    
+    for (i in people) {
+        if (people[i].carrying_flag != null) {
+          carried_flags[people[i].carrying_flag] = i;
+
+        }
+    };
+
     for (i in people) {
       if (people[i].team != team) {
-        if (map.distance(marker.getLatLng(), people[i].flag_pos) < 100) {
-          has_flag = people[i].team;
+        if (map.distance(L.latLng(coord), people[i].flag_pos) < 300) {
+          carrying_flag_user_id = i;
         }
       }
+      if (i in Object.keys(carried_flags)) {
+        people[i].flag_marker.setLatLng(people[i].coord);
+        people[i].flag_marker.setOpacity(0);
+
+      }else {
+        people[i].flag_marker.setOpacity(1);
+
+      }
+      
     }
 
     old_coord = coord;
@@ -481,7 +548,7 @@ onload = function () {
     marker.setIcon(
       L.divIcon({ className: "player div-icon" + " team-" + team })
     );
-
+    save_cookies();
 
   }, 5000);
   video = document.querySelector("video");
