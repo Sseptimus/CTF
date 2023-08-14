@@ -29,7 +29,7 @@ PASSWORD = generate_random_string(12)
 
 def backup():
     with open("backup.json", "w") as f:
-        f.write(json.dumps(PLAYER_DATA))
+        f.write(json.dumps(PLAYER_DATA, indent=2))
 
 
 def load_backup():
@@ -62,7 +62,7 @@ def merge_json(old, new):
 
 def handle_json_set_post(handler):
     print(handler.query_data)
-    player_id = int(handler.query_data["player_id"])
+    player_id = str(handler.query_data["player_id"])
 
     data = handler.json_data
 
@@ -126,7 +126,7 @@ def handle_post_resource(handler):
     handler.wfile.write(filename.encode("utf-8"))
     
 def handle_json_get(handler):
-    player_id = int(handler.query_data["player_id"])
+    player_id = str(handler.query_data["player_id"])
 
     data = PLAYER_DATA.get(player_id)
 
